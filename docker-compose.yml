@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  #db:
+  #  image: postgres:10.1
+  web:
+    build:
+      context: .
+      args:
+        DEVEL: "yes"
+    command: hupper -m gunicorn.app.wsgiapp -b 0.0.0.0:8080 inspector.main:app
+    env_file: dev/environment
+    volumes:
+      - .:/app/
+    ports:
+      - "80:8080"
+    #links:
+    #  - db

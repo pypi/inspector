@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block h2 %}{{ h2 }}{% endblock %}
+{% block h3 %}{{ h3 }}{% endblock %}
+{% block body %}
+<ul>
+{% for link in links %}
+<li><a href="{{ link }}">{{ link }}</a></li>
+{% endfor %}
+</ul>
+{% endblock %}

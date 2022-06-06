@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="/static/prism.css">
+{% endblock %}
+
+{% block body %}
+<pre id="line" class="line-numbers linkable-line-numbers language-python">
+<code class="language-python">{{- code|safe }}</code>
+</pre>
+<script src="/static/prism.js"></script>
+{% endblock %}
