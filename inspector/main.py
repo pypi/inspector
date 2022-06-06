@@ -1,11 +1,10 @@
 import os
-
-from flask import Flask, render_template, redirect, request, abort
-import requests
 import urllib.parse
-from io import BytesIO
 import zipfile
+from io import BytesIO
 
+import requests
+from flask import Flask, abort, redirect, render_template, request
 
 app = Flask(__name__)
 
