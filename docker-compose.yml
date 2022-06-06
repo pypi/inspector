@@ -7,7 +7,7 @@ services:
       context: .
       args:
         DEVEL: "yes"
-    command: hupper -m gunicorn.app.wsgiapp -b 0.0.0.0:8080 inspector.main:app
+    command: gunicorn --reload -b 0.0.0.0:8080 inspector.main:app
     env_file: dev/environment
     volumes:
       - .:/app/
