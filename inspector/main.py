@@ -1,4 +1,5 @@
 import os
+import tarfile
 import urllib.parse
 import zipfile
 from io import BytesIO
@@ -44,45 +45,98 @@ def distributions(project_name, version):
     )
 
 
+class Distribution:
+    def namelist(self):
+        raise NotImplementedError
+
+    def read(self):
+        raise NotImplementedError
+
+
+class ZipDistribution(Distribution):
+    def __init__(self, f):
+        f.seek(0)
+        self.zipfile = zipfile.ZipFile(f)
+
+    def namelist(self):
+        return self.zipfile.namelist()
+
+    def contents(self, filepath):
+        return self.zipfile.read(filepath).decode()
+
+
+class TarGzDistribution(Distribution):
+    def __init__(self, f):
+        f.seek(0)
+        self.tarfile = tarfile.open(fileobj=f, mode="r:gz")
+
+    def namelist(self):
+        return self.tarfile.getnames()
+
+    def contents(self, filepath):
+        return self.tarfile.extractfile(filepath).read().decode()
+
+
 def _get_dist(first, second, rest, distname):
     if distname in dists:
         return dists[distname]
     url = f"https://files.pythonhosted.org/packages/{first}/{second}/{rest}/{distname}"
     resp = requests.get(url)
-    f = BytesIO()
-    f.write(resp.content)
-    input_zip = zipfile.ZipFile(f)
-    dists[distname] = input_zip
-    return input_zip
+    f = BytesIO(resp.content)
+
+    if (
+        distname.endswith(".whl")
+        or distname.endswith(".zip")
+        or distname.endswith(".egg")
+    ):
+        distfile = ZipDistribution(f)
+        dists[distname] = distfile
+        return distfile
+
+    elif distname.endswith(".tar.gz"):
+        distfile = TarGzDistribution(f)
+        dists[distname] = distfile
+        return distfile
+
+    else:
+        # Not supported
+        return None
 
 
 @app.route(
     "/project/<project_name>/<version>/packages/<first>/<second>/<rest>/<distname>/"
 )
 def distribution(project_name, version, first, second, rest, distname):
-    input_zip = _get_dist(first, second, rest, distname)
-    file_urls = ["./" + filename for filename in input_zip.namelist()]
+    dist = _get_dist(first, second, rest, distname)
 
-    return render_template(
-        "links.html",
-        links=file_urls,
-        h2=f"{project_name}=={version}",
-        h3=distname,
-    )
+    if dist:
+        file_urls = ["./" + filename for filename in dist.namelist()]
+        return render_template(
+            "links.html",
+            links=file_urls,
+            h2=f"{project_name}=={version}",
+            h3=distname,
+        )
+    else:
+        return "Distribution type not supported"
 
 
 @app.route(
     "/project/<project_name>/<version>/packages/<first>/<second>/<rest>/<distname>/<path:filepath>"
 )
 def file(project_name, version, first, second, rest, distname, filepath):
-    input_zip = _get_dist(first, second, rest, distname)
-    return render_template(
-        "code.html",
-        code=input_zip.read(filepath).decode(),
-        h2=f"{project_name}=={version}",
-        h3=distname,
-        h4=filepath,
-    )
+    dist = _get_dist(first, second, rest, distname)
+
+    if dist:
+        return render_template(
+            "code.html",
+            code=dist.contents(filepath),
+            h2=f"{project_name}=={version}",
+            h3=distname,
+            h4=filepath,
+        )
+    else:
+        return "Distribution type not supported"
 
 
 @app.route("/_health/")
