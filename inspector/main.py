@@ -89,7 +89,3 @@ def file(project_name, version, first, second, rest, distname, filepath):
 @app.route("/_health/")
 def health():
     return "OK"
-
-
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))

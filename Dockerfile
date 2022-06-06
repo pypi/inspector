@@ -2,20 +2,33 @@
 # https://hub.docker.com/_/python
 FROM python:3.10-slim
 
-# Allow statements and log messages to immediately appear in the Knative logs
-ENV PYTHONUNBUFFERED True
+# Define whether we're building a production or a development image. This will
+# generally be used to control whether or not we install our development and
+# test dependencies.
+ARG DEVEL=no
 
 # Copy local code to the container image.
-ENV APP_HOME /app
-WORKDIR $APP_HOME
-COPY . ./
+WORKDIR /app
+
+# Install System level requirements, this is done before everything else
+# because these are rarely ever going to change.
+#RUN set -x \
+#    && apt-get update \
+#    && apt-get install --no-install-recommends -y \
+#        $(if [ "$DEVEL" = "yes" ]; then echo 'bash postgresql-client'; fi) \
+#    && apt-get clean \
+#    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Copy in requirements files
+COPY ./requirements ./requirements
 
 # Install production dependencies.
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install \
+  -r requirements/main.txt \
+  -r requirements/deploy.txt
 
-# Run the web service on container startup. Here we use the gunicorn
-# webserver, with one worker process and 8 threads.
-# For environments with multiple CPU cores, increase the number of workers
-# to be equal to the cores available.
-# Timeout is set to 0 to disable the timeouts of the workers to allow Cloud Run to handle instance scaling.
-CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app
+# Install development dependencies
+RUN if [ "$DEVEL" = "yes" ]; then pip install -r requirements/dev.txt; fi
+
+# Copy in everything else
+COPY . .
