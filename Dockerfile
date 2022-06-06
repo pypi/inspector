@@ -2,6 +2,9 @@
 # https://hub.docker.com/_/python
 FROM python:3.10-slim
 
+# Allow statements and log messages to immediately appear in the logs
+ENV PYTHONUNBUFFERED True
+
 # Define whether we're building a production or a development image. This will
 # generally be used to control whether or not we install our development and
 # test dependencies.
