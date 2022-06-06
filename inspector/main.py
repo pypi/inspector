@@ -4,7 +4,7 @@ import zipfile
 from io import BytesIO
 
 import requests
-from flask import Flask, abort, redirect, render_template, request
+from flask import Flask, Response, abort, redirect, render_template, request
 
 app = Flask(__name__)
 
@@ -88,3 +88,8 @@ def file(project_name, version, first, second, rest, distname, filepath):
 @app.route("/_health/")
 def health():
     return "OK"
+
+
+@app.route("/robots.txt")
+def robots():
+    return Response("User-agent: *\nDisallow: /", mimetype="text/plain")
