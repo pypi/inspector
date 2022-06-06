@@ -4,6 +4,7 @@ import urllib.parse
 import zipfile
 from io import BytesIO
 
+import packaging.version
 import requests
 from flask import Flask, Response, abort, redirect, render_template, request
 
@@ -26,7 +27,12 @@ def versions(project_name):
     if resp.status_code != 200:
         return abort(404)
 
-    version_urls = ["." + "/" + version for version in resp.json()["releases"].keys()]
+    version_urls = [
+        "." + "/" + str(version)
+        for version in sorted(
+            resp.json()["releases"].keys(), key=packaging.version.Version, reverse=True
+        )
+    ]
     return render_template("links.html", links=version_urls, h2=project_name)
 
 
