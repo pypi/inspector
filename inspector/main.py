@@ -33,7 +33,12 @@ def versions(project_name):
             resp.json()["releases"].keys(), key=packaging.version.Version, reverse=True
         )
     ]
-    return render_template("links.html", links=version_urls, h2=project_name)
+    return render_template(
+        "links.html",
+        links=version_urls,
+        h2=project_name,
+        h2_link=f"/project/{project_name}",
+    )
 
 
 @app.route("/project/<project_name>/<version>/")
@@ -47,7 +52,10 @@ def distributions(project_name, version):
         for release in resp.json()["releases"][version]
     ]
     return render_template(
-        "links.html", links=dist_urls, h2=f"{project_name}=={version}"
+        "links.html",
+        links=dist_urls,
+        h2=f"{project_name}=={version}",
+        h2_link=f"/project/{project_name}/{version}",
     )
 
 
@@ -121,7 +129,9 @@ def distribution(project_name, version, first, second, rest, distname):
             "links.html",
             links=file_urls,
             h2=f"{project_name}=={version}",
+            h2_link=f"/project/{project_name}/{version}",
             h3=distname,
+            h3_link=f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/",
         )
     else:
         return "Distribution type not supported"
@@ -138,8 +148,11 @@ def file(project_name, version, first, second, rest, distname, filepath):
             "code.html",
             code=dist.contents(filepath),
             h2=f"{project_name}=={version}",
+            h2_link=f"/project/{project_name}/{version}",
             h3=distname,
+            h3_link=f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/",
             h4=filepath,
+            h4_link=f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/{filepath}",
         )
     else:
         return "Distribution type not supported"

@@ -4,10 +4,28 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🕵️</text></svg>">
   </head>
   <body>
-    <h1>Inspector</h1>
-    <h2>{{ h2 }}</h2>
-    <h3>{{ h3 }}</h3>
-    <h4>{{ h4 }}</h4>
+    <h1><a href="/">Inspector</a></h1>
+    <h2>
+      {% if h2_link %}
+      <a href="{{ h2_link }}">{{ h2 }}</a>
+      {% else %}
+      {{ h2 }}
+      {% endif %}
+    </h2>
+    <h3>
+      {% if h3_link %}
+      <a href="{{ h3_link }}">{{ h3 }}</a>
+      {% else %}
+      {{ h3 }}
+      {% endif %}
+    </h3>
+    <h4>
+      {% if h4_link %}
+      <a href="{{ h4_link }}">{{ h4 }}</a>
+      {% else %}
+      {{ h4 }}
+      {% endif %}
+    </h4>
     {% block body %}{% endblock %}
   </body>
 </html>
