@@ -144,9 +144,13 @@ def file(project_name, version, first, second, rest, distname, filepath):
     dist = _get_dist(first, second, rest, distname)
 
     if dist:
+        try:
+            contents = dist.contents(filepath)
+        except UnicodeDecodeError:
+            return "Binary files are not supported"
         return render_template(
             "code.html",
-            code=dist.contents(filepath),
+            code=contents,
             h2=f"{project_name}=={version}",
             h2_link=f"/project/{project_name}/{version}",
             h3=distname,
