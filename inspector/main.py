@@ -73,7 +73,7 @@ class ZipDistribution(Distribution):
         self.zipfile = zipfile.ZipFile(f)
 
     def namelist(self):
-        return self.zipfile.namelist()
+        return [i.filename for i in self.zipfile.infolist() if not i.is_dir()]
 
     def contents(self, filepath):
         return self.zipfile.read(filepath).decode()
@@ -85,7 +85,7 @@ class TarGzDistribution(Distribution):
         self.tarfile = tarfile.open(fileobj=f, mode="r:gz")
 
     def namelist(self):
-        return self.tarfile.getnames()
+        return [i.name for i in self.tarfile.getmembers() if not i.isdir()]
 
     def contents(self, filepath):
         return self.tarfile.extractfile(filepath).read().decode()
@@ -144,9 +144,13 @@ def file(project_name, version, first, second, rest, distname, filepath):
     dist = _get_dist(first, second, rest, distname)
 
     if dist:
+        try:
+            contents = dist.contents(filepath)
+        except UnicodeDecodeError:
+            return "Binary files are not supported"
         return render_template(
             "code.html",
-            code=dist.contents(filepath),
+            code=contents,
             h2=f"{project_name}=={version}",
             h2_link=f"/project/{project_name}/{version}",
             h3=distname,
