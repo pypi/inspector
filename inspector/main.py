@@ -95,7 +95,7 @@ def _get_dist(first, second, rest, distname):
     if distname in dists:
         return dists[distname]
     url = f"https://files.pythonhosted.org/packages/{first}/{second}/{rest}/{distname}"
-    resp = requests.get(url)
+    resp = requests.get(url, stream=True)
     f = BytesIO(resp.content)
 
     if (
