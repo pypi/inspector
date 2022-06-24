@@ -12,6 +12,9 @@
       {% else %}
       {{ h2 }}
       {% endif %}
+      {% if h2_paren_link %}
+      (<a href="{{ h2_paren_link }}">{{ h2_paren }}</a>)
+      {% endif %}
     </h2>
     <h3>
       {% if h3_link %}

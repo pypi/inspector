@@ -48,6 +48,8 @@ def versions(project_name):
         links=version_urls,
         h2=project_name,
         h2_link=f"/project/{project_name}",
+        h2_paren="View this project on PyPI",
+        h2_paren_link=f"https://pypi.org/project/{project_name}",
     )
 
 
@@ -66,6 +68,8 @@ def distributions(project_name, version):
         links=dist_urls,
         h2=f"{project_name}=={version}",
         h2_link=f"/project/{project_name}/{version}",
+        h2_paren="View this release on PyPI",
+        h2_paren_link=f"https://pypi.org/project/{project_name}/{version}",
     )
 
 
