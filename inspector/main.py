@@ -8,6 +8,16 @@ import packaging.version
 import requests
 from flask import Flask, Response, abort, redirect, render_template, request
 
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+
+SENTRY_DSN = os.environ["SENTRY_DSN"]
+sentry_sdk.init(
+    dsn=SENTRY_DSN,
+    integrations=[FlaskIntegration()],
+    traces_sample_rate=1.0,
+)
+
 app = Flask(__name__)
 
 # Lightweight datastore ;)
