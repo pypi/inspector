@@ -1,4 +1,7 @@
+#!/usr/bin/env -S pip-compile --allow-unsafe --generate-hashes --output-file=requirements/main.txt
+
 Flask
 gunicorn
 requests
 packaging
+sentry-sdk[flask]
