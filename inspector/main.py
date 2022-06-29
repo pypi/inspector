@@ -66,10 +66,14 @@ def distributions(project_name, version):
     return render_template(
         "links.html",
         links=dist_urls,
-        h2=f"{project_name}=={version}",
-        h2_link=f"/project/{project_name}/{version}",
-        h2_paren="View this release on PyPI",
-        h2_paren_link=f"https://pypi.org/project/{project_name}/{version}",
+        h2=f"{project_name}",
+        h2_link=f"/project/{project_name}",
+        h2_paren="View this project on PyPI",
+        h2_paren_link=f"https://pypi.org/project/{project_name}",
+        h3=f"{project_name}=={version}",
+        h3_link=f"/project/{project_name}/{version}",
+        h3_paren="View this release on PyPI",
+        h3_paren_link=f"https://pypi.org/project/{project_name}/{version}",
     )
 
 
@@ -142,10 +146,12 @@ def distribution(project_name, version, first, second, rest, distname):
         return render_template(
             "links.html",
             links=file_urls,
-            h2=f"{project_name}=={version}",
-            h2_link=f"/project/{project_name}/{version}",
-            h3=distname,
-            h3_link=f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/",
+            h2=f"{project_name}",
+            h2_link=f"/project/{project_name}",
+            h3=f"{project_name}=={version}",
+            h3_link=f"/project/{project_name}/{version}",
+            h4=distname,
+            h4_link=f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/",
         )
     else:
         return "Distribution type not supported"
