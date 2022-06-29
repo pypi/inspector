@@ -1,4 +1,6 @@
 #!/usr/bin/env -S pip-compile --allow-unsafe --generate-hashes --output-file=requirements/lint.txt
 
 black
+curlylint
+flake8
 isort
