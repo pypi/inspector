@@ -40,7 +40,7 @@ def versions(project_name):
     version_urls = [
         "." + "/" + str(version)
         for version in sorted(
-            resp.json()["releases"].keys(), key=packaging.version.Version, reverse=True
+            resp.json()["releases"].keys(), key=packaging.version.parse, reverse=True
         )
     ]
     return render_template(
