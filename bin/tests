@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e
+
+COMMAND_ARGS="$@"
+
+# Print all the following commands
+set -x
+
+# Actually run our tests.
+python -m pytest $COMMAND_ARGS

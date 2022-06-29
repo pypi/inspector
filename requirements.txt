@@ -1,3 +1,5 @@
 # This is just for Dependabot
 -r requirements/main.txt
 -r requirements/deploy.txt
+-r requirements/lint.txt
+-r requirements/tests.txt

@@ -25,5 +25,12 @@ reformat:
 	docker-compose run --rm web isort -rc inspector #migrations
 	docker-compose run --rm web black inspector #migrations
 
+tests: .state/docker-build
+	docker-compose run --rm web bin/tests $(T) $(TESTARGS)
 
-.PHONY: default serve #initdb
+
+lint: .state/docker-build
+	docker-compose run --rm web bin/lint $(T) $(TESTARGS)
+
+
+.PHONY: default serve tests lint #initdb

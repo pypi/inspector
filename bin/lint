@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e
+
+# Print all the following commands
+set -x
+
+# Actually run our tests.
+python -m flake8 .
+python -m black --check *.py inspector/ tests/
+python -m isort --check *.py inspector/ tests/
+python -m doc8 --allow-long-titles README.rst CONTRIBUTING.rst docs/ --ignore-path docs/_build/
+python -m curlylint ./inspector/templates
+python -m mypy -p inspector
