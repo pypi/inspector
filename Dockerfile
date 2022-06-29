@@ -34,6 +34,8 @@ RUN pip install \
   -r requirements/deploy.txt
 
 # Install development dependencies
+RUN if [ "$DEVEL" = "yes" ]; then pip install -r requirements/lint.txt; fi
+RUN if [ "$DEVEL" = "yes" ]; then pip install -r requirements/tests.txt; fi
 RUN if [ "$DEVEL" = "yes" ]; then pip install -r requirements/dev.txt; fi
 
 # Copy in everything else

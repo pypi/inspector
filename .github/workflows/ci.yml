@@ -1,5 +1,9 @@
 name: CI
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
 jobs:
   test:
     strategy:
@@ -10,6 +14,7 @@ jobs:
           - name: Lint
             command: bin/lint
     runs-on: ubuntu-latest
+    name: ${{ matrix.name }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
