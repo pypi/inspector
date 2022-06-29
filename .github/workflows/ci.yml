@@ -1,0 +1,29 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    strategy:
+      matrix:
+        include:
+          - name: Tests
+            command: bin/tests
+          - name: Lint
+            command: bin/lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version-file: '.python-version'
+          cache: 'pip'
+          cache-dependency-path: |
+            requirements.txt
+            requirements/*.txt
+      - name: Install Python dependencies
+        run: |
+          pip install -U pip setuptools wheel
+          pip install -r requirements.txt --no-deps
+          pip install -r requirements/dev.txt
+      - name: Run ${{ matrix.name }}
+        run: ${{ matrix.command }}

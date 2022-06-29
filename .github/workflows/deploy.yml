@@ -1,7 +1,0 @@
-name: Deploy
-on: [push, pull_request]
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Yo deploy me"
