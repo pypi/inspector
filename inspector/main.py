@@ -6,9 +6,8 @@ from io import BytesIO
 
 import packaging.version
 import requests
-from flask import Flask, Response, abort, redirect, render_template, request
-
 import sentry_sdk
+from flask import Flask, Response, abort, redirect, render_template, request
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 if SENTRY_DSN := os.environ.get("SENTRY_DSN"):
@@ -151,14 +150,14 @@ def distribution(project_name, version, first, second, rest, distname):
             h3=f"{project_name}=={version}",
             h3_link=f"/project/{project_name}/{version}",
             h4=distname,
-            h4_link=f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/",
+            h4_link=f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/",  # noqa
         )
     else:
         return "Distribution type not supported"
 
 
 @app.route(
-    "/project/<project_name>/<version>/packages/<first>/<second>/<rest>/<distname>/<path:filepath>"
+    "/project/<project_name>/<version>/packages/<first>/<second>/<rest>/<distname>/<path:filepath>"  # noqa
 )
 def file(project_name, version, first, second, rest, distname, filepath):
     dist = _get_dist(first, second, rest, distname)
@@ -174,9 +173,9 @@ def file(project_name, version, first, second, rest, distname, filepath):
             h2=f"{project_name}=={version}",
             h2_link=f"/project/{project_name}/{version}",
             h3=distname,
-            h3_link=f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/",
+            h3_link=f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/",  # noqa
             h4=filepath,
-            h4_link=f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/{filepath}",
+            h4_link=f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/{filepath}",  # noqa
         )
     else:
         return "Distribution type not supported"
