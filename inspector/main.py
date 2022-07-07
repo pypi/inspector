@@ -59,8 +59,8 @@ def distributions(project_name, version):
         return abort(404)
 
     dist_urls = [
-        "." + urllib.parse.urlparse(release["url"]).path + "/"
-        for release in resp.json()["releases"][version]
+        "." + urllib.parse.urlparse(url["url"]).path + "/"
+        for url in resp.json()["urls"]
     ]
     return render_template(
         "links.html",
