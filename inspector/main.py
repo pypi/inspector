@@ -59,8 +59,8 @@ def distributions(project_name, version):
         return abort(404)
 
     dist_urls = [
-        "." + urllib.parse.urlparse(release["url"]).path + "/"
-        for release in resp.json()["releases"][version]
+        "." + urllib.parse.urlparse(url["url"]).path + "/"
+        for url in resp.json()["urls"]
     ]
     return render_template(
         "links.html",
@@ -167,6 +167,8 @@ def file(project_name, version, first, second, rest, distname, filepath):
             contents = dist.contents(filepath)
         except UnicodeDecodeError:
             return "Binary files are not supported"
+        except KeyError:
+            return abort(404)
         return render_template(
             "code.html",
             code=contents,
