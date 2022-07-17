@@ -167,6 +167,8 @@ def file(project_name, version, first, second, rest, distname, filepath):
             contents = dist.contents(filepath)
         except UnicodeDecodeError:
             return "Binary files are not supported"
+        except KeyError:
+            return abort(404)
         return render_template(
             "code.html",
             code=contents,
