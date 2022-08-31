@@ -108,10 +108,13 @@ class TarGzDistribution(Distribution):
         return [i.name for i in self.tarfile.getmembers() if not i.isdir()]
 
     def contents(self, filepath):
-        file_ = self.tarfile.extractfile(filepath)
-        if file_:
-            return file_.read().decode()
-        else:
+        try:
+            file_ = self.tarfile.extractfile(filepath)
+            if file_:
+                return file_.read().decode()
+            else:
+                raise FileNotFoundError
+        except KeyError:
             raise FileNotFoundError
 
 
