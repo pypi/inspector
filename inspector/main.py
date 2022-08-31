@@ -93,7 +93,10 @@ class ZipDistribution(Distribution):
         return [i.filename for i in self.zipfile.infolist() if not i.is_dir()]
 
     def contents(self, filepath):
-        return self.zipfile.read(filepath).decode()
+        try:
+            self.zipfile.read(filepath).decode()
+        except KeyError:
+            raise FileNotFoundError
 
 
 class TarGzDistribution(Distribution):
@@ -105,7 +108,11 @@ class TarGzDistribution(Distribution):
         return [i.name for i in self.tarfile.getmembers() if not i.isdir()]
 
     def contents(self, filepath):
-        return self.tarfile.extractfile(filepath).read().decode()
+        file_ = self.tarfile.extractfile(filepath)
+        if file_:
+            return file_.read().decode()
+        else:
+            raise FileNotFoundError
 
 
 def _get_dist(first, second, rest, distname):
@@ -167,7 +174,7 @@ def file(project_name, version, first, second, rest, distname, filepath):
             contents = dist.contents(filepath)
         except UnicodeDecodeError:
             return "Binary files are not supported"
-        except KeyError:
+        except FileNotFoundError:
             return abort(404)
         return render_template(
             "code.html",
