@@ -94,7 +94,7 @@ class ZipDistribution(Distribution):
 
     def contents(self, filepath):
         try:
-            self.zipfile.read(filepath).decode()
+            return self.zipfile.read(filepath).decode()
         except KeyError:
             raise FileNotFoundError
 
