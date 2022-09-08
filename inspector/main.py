@@ -121,8 +121,14 @@ class TarGzDistribution(Distribution):
 def _get_dist(first, second, rest, distname):
     if distname in dists:
         return dists[distname]
+
     url = f"https://files.pythonhosted.org/packages/{first}/{second}/{rest}/{distname}"
-    resp = requests.get(url, stream=True)
+    try:
+        resp = requests.get(url, stream=True)
+        resp.raise_for_status()
+    except requests.HTTPError as exc:
+        abort(exc.response.status_code)
+
     f = BytesIO(resp.content)
 
     if (
