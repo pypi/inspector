@@ -4,6 +4,7 @@ import urllib.parse
 import zipfile
 from io import BytesIO
 
+import gunicorn.http.errors
 import packaging.version
 import requests
 import sentry_sdk
@@ -21,6 +22,11 @@ app = Flask(__name__)
 
 # Lightweight datastore ;)
 dists = {}
+
+
+@app.errorhandler(gunicorn.http.errors.ParseException)
+def handle_bad_request(e):
+    return abort(400)
 
 
 @app.route("/")
