@@ -138,7 +138,7 @@ pre[id].linkable-line-numbers span.line-numbers-rows>span:before{
 pre[id].linkable-line-numbers span.line-numbers-rows>span:hover:before{
     background-color:rgba(128,128,128,.2)
 }
- pre[class*=language-].line-numbers{
+pre[class*=language-].line-numbers{
     position:relative;
     padding-left:3.8em;
     counter-reset:linenumber
@@ -173,3 +173,7 @@ pre[class*=language-].line-numbers>code{
     text-align:right
 }
 
+/* Custom styles -- keep these when upgrading! */
+pre[class*=language-]{
+    white-space: pre-wrap;
+}
