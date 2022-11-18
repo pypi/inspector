@@ -20,6 +20,8 @@ if SENTRY_DSN := os.environ.get("SENTRY_DSN"):
 
 app = Flask(__name__)
 
+app.jinja_env.filters["unquote"] = lambda u: urllib.parse.unquote(u)
+
 # Lightweight datastore ;)
 dists = {}
 
@@ -163,7 +165,9 @@ def distribution(project_name, version, first, second, rest, distname):
     dist = _get_dist(first, second, rest, distname)
 
     if dist:
-        file_urls = ["./" + filename for filename in dist.namelist()]
+        file_urls = [
+            "./" + urllib.parse.quote_plus(filename) for filename in dist.namelist()
+        ]
         return render_template(
             "links.html",
             links=file_urls,
