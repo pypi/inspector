@@ -32,5 +32,7 @@ tests: .state/docker-build
 lint: .state/docker-build
 	docker-compose run --rm web bin/lint $(T) $(TESTARGS)
 
+stop:
+	docker-compose down -v
 
 .PHONY: default serve tests lint #initdb
