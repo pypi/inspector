@@ -64,7 +64,7 @@ def versions(project_name):
 def distributions(project_name, version):
     resp = requests.get(f"https://pypi.org/pypi/{project_name}/{version}/json")
     if resp.status_code != 200:
-        return abort(404)
+        return redirect(f"/project/{ project_name }/")
 
     dist_urls = [
         "." + urllib.parse.urlparse(url["url"]).path + "/"
