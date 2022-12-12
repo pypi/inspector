@@ -166,7 +166,7 @@ def distribution(project_name, version, first, second, rest, distname):
 
     if dist:
         file_urls = [
-            "./" + urllib.parse.quote_plus(filename) for filename in dist.namelist()
+            "./" + urllib.parse.quote(filename) for filename in dist.namelist()
         ]
         return render_template(
             "links.html",
