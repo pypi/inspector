@@ -41,8 +41,10 @@ def index():
 @app.route("/project/<project_name>/")
 def versions(project_name):
     resp = requests.get(f"https://pypi.org/pypi/{project_name}/json")
+    pypi_project_url = f"https://pypi.org/project/{project_name}"
+
     if resp.status_code != 200:
-        return abort(404)
+        return redirect(pypi_project_url, 307)
 
     version_urls = [
         "." + "/" + str(version)
@@ -56,7 +58,7 @@ def versions(project_name):
         h2=project_name,
         h2_link=f"/project/{project_name}",
         h2_paren="View this project on PyPI",
-        h2_paren_link=f"https://pypi.org/project/{project_name}",
+        h2_paren_link=pypi_project_url,
     )
 
 
