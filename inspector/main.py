@@ -5,11 +5,12 @@ import zipfile
 from io import BytesIO
 
 import gunicorn.http.errors
-import packaging.version
 import requests
 import sentry_sdk
 from flask import Flask, Response, abort, redirect, render_template, request
 from sentry_sdk.integrations.flask import FlaskIntegration
+
+from .legacy import parse
 
 if SENTRY_DSN := os.environ.get("SENTRY_DSN"):
     sentry_sdk.init(
@@ -48,9 +49,7 @@ def versions(project_name):
 
     version_urls = [
         "." + "/" + str(version)
-        for version in sorted(
-            resp.json()["releases"].keys(), key=packaging.version.parse, reverse=True
-        )
+        for version in sorted(resp.json()["releases"].keys(), key=parse, reverse=True)
     ]
     return render_template(
         "links.html",
