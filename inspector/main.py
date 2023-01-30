@@ -12,11 +12,24 @@ from sentry_sdk.integrations.flask import FlaskIntegration
 
 from .legacy import parse
 
+
+def traces_sampler(sampling_context):
+    """
+    Filter out noisy transactions.
+    See https://github.com/getsentry/sentry-python/discussions/1569
+    """
+    path = sampling_context.get("wsgi_environ", {}).get("PATH_INFO", None)
+    if path and path == "/_health/":
+        return 0
+    return 1
+
+
 if SENTRY_DSN := os.environ.get("SENTRY_DSN"):
     sentry_sdk.init(
         dsn=SENTRY_DSN,
         integrations=[FlaskIntegration()],
         traces_sample_rate=1.0,
+        traces_sampler=traces_sampler,
     )
 
 app = Flask(__name__)
