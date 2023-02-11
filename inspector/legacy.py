@@ -108,7 +108,6 @@ def _parse_version_parts(s: str) -> Iterator[str]:
 
 
 def _legacy_cmpkey(version: str) -> LegacyCmpKey:
-
     # We hardcode an epoch of -1 here. A PEP 440 version can only have a epoch
     # greater than or equal to 0. This will effectively put the LegacyVersion,
     # which uses the defacto standard originally implemented by setuptools,
