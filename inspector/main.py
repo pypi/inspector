@@ -187,8 +187,12 @@ def distribution(project_name, version, first, second, rest, distname):
             links=file_urls,
             h2=f"{project_name}",
             h2_link=f"/project/{project_name}",
+            h2_paren="View this project on PyPI",
+            h2_paren_link=f"https://pypi.org/project/{project_name}",
             h3=f"{project_name}=={version}",
             h3_link=f"/project/{project_name}/{version}",
+            h3_paren="View this release on PyPI",
+            h3_paren_link=f"https://pypi.org/project/{project_name}/{version}",
             h4=distname,
             h4_link=f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/",  # noqa
         )
@@ -212,12 +216,18 @@ def file(project_name, version, first, second, rest, distname, filepath):
         return render_template(
             "code.html",
             code=contents,
-            h2=f"{project_name}=={version}",
-            h2_link=f"/project/{project_name}/{version}",
-            h3=distname,
-            h3_link=f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/",  # noqa
-            h4=filepath,
-            h4_link=f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/{filepath}",  # noqa
+            h2=f"{project_name}",
+            h2_link=f"/project/{project_name}",
+            h2_paren="View this project on PyPI",
+            h2_paren_link=f"https://pypi.org/project/{project_name}",
+            h3=f"{project_name}=={version}",
+            h3_link=f"/project/{project_name}/{version}",
+            h3_paren="View this release on PyPI",
+            h3_paren_link=f"https://pypi.org/project/{project_name}/{version}",
+            h4=distname,
+            h4_link=f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/",  # noqa
+            h5=filepath,
+            h5_link=f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/{filepath}",  # noqa
         )
     else:
         return "Distribution type not supported"
