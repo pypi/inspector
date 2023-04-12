@@ -48,7 +48,7 @@ def handle_bad_request(e):
 @app.route("/")
 def index():
     if project := request.args.get("project"):
-        return redirect(f"/project/{ project }")
+        return redirect(f"/project/{project}")
     return render_template("index.html")
 
 
@@ -78,7 +78,7 @@ def versions(project_name):
 def distributions(project_name, version):
     resp = requests.get(f"https://pypi.org/pypi/{project_name}/{version}/json")
     if resp.status_code != 200:
-        return redirect(f"/project/{ project_name }/")
+        return redirect(f"/project/{project_name}/")
 
     dist_urls = [
         "." + urllib.parse.urlparse(url["url"]).path + "/"
@@ -204,19 +204,23 @@ def mailto_report_link(project_name, version, file_path, request_url):
     """
     Generate a mailto report link for malicious code.
     """
-    message_body = "PyPI Malicious Package Report\n" \
-                   "--\n" \
-                   f"Package Name: {project_name}\n" \
-                   f"Version: {version}\n" \
-                   f"File Path: {file_path}\n" \
-                   f"Inspector URL: {request_url}\n\n" \
-                   "Additional Information:\n\n"
+    message_body = (
+        "PyPI Malicious Package Report\n"
+        "--\n"
+        f"Package Name: {project_name}\n"
+        f"Version: {version}\n"
+        f"File Path: {file_path}\n"
+        f"Inspector URL: {request_url}\n\n"
+        "Additional Information:\n\n"
+    )
 
     subject = f"Malicious Package Report: {project_name}"
 
-    return f"mailto:security@pypi.org?" \
-           f"subject={urllib.parse.quote(subject)}" \
-           f"&body={urllib.parse.quote(message_body)}"
+    return (
+        f"mailto:security@pypi.org?"
+        f"subject={urllib.parse.quote(subject)}"
+        f"&body={urllib.parse.quote(message_body)}"
+    )
 
 
 @app.route(
