@@ -200,12 +200,30 @@ def distribution(project_name, version, first, second, rest, distname):
         return "Distribution type not supported"
 
 
+def mailto_report_link(project_name, version, file_path, request_url):
+    """
+    Generate a mailto report link for malicious code.
+    """
+    message_body = "PyPI Malicious Package Report\n" \
+                   "--\n" \
+                   f"Package Name: {project_name}\n" \
+                   f"Version: {version}\n" \
+                   f"File Path: {file_path}\n" \
+                   f"Inspector URL: {request_url}\n\n" \
+                   "Additional Information:\n\n"
+
+    subject = f"Malicious Package Report: {project_name}"
+
+    return f"mailto:security@pypi.org?" \
+           f"subject={urllib.parse.quote(subject)}" \
+           f"&body={urllib.parse.quote(message_body)}"
+
+
 @app.route(
     "/project/<project_name>/<version>/packages/<first>/<second>/<rest>/<distname>/<path:filepath>"  # noqa
 )
 def file(project_name, version, first, second, rest, distname, filepath):
     dist = _get_dist(first, second, rest, distname)
-
     if dist:
         try:
             contents = dist.contents(filepath)
@@ -213,9 +231,12 @@ def file(project_name, version, first, second, rest, distname, filepath):
             return "Binary files are not supported"
         except FileNotFoundError:
             return abort(404)
+
+        report_link = mailto_report_link(project_name, version, filepath, request.url)
         return render_template(
             "code.html",
             code=contents,
+            mailto_report_link=report_link,
             h2=f"{project_name}",
             h2_link=f"/project/{project_name}",
             h2_paren="View this project on PyPI",
