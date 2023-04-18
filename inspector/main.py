@@ -5,10 +5,10 @@ import zipfile
 from io import BytesIO
 
 import gunicorn.http.errors
-from packaging.utils import canonicalize_name
 import requests
 import sentry_sdk
 from flask import Flask, Response, abort, redirect, render_template, request, url_for
+from packaging.utils import canonicalize_name
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 from .legacy import parse
