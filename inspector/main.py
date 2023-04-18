@@ -2,12 +2,15 @@ import os
 import tarfile
 import urllib.parse
 import zipfile
+
 from io import BytesIO
 
 import gunicorn.http.errors
 import requests
 import sentry_sdk
-from flask import Flask, Response, abort, redirect, render_template, request
+
+from flask import Flask, Response, abort, redirect, render_template, request, url_for
+from packaging.utils import canonicalize_name
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 from .legacy import parse
@@ -54,6 +57,11 @@ def index():
 
 @app.route("/project/<project_name>/")
 def versions(project_name):
+    if project_name != canonicalize_name(project_name):
+        return redirect(
+            url_for("versions", project_name=canonicalize_name(project_name)), 301
+        )
+
     resp = requests.get(f"https://pypi.org/pypi/{project_name}/json")
     pypi_project_url = f"https://pypi.org/project/{project_name}"
 
@@ -76,6 +84,16 @@ def versions(project_name):
 
 @app.route("/project/<project_name>/<version>/")
 def distributions(project_name, version):
+    if project_name != canonicalize_name(project_name):
+        return redirect(
+            url_for(
+                "distributions",
+                project_name=canonicalize_name(project_name),
+                version=version,
+            ),
+            301,
+        )
+
     resp = requests.get(f"https://pypi.org/pypi/{project_name}/{version}/json")
     if resp.status_code != 200:
         return redirect(f"/project/{project_name}/")
@@ -176,6 +194,20 @@ def _get_dist(first, second, rest, distname):
     "/project/<project_name>/<version>/packages/<first>/<second>/<rest>/<distname>/"
 )
 def distribution(project_name, version, first, second, rest, distname):
+    if project_name != canonicalize_name(project_name):
+        return redirect(
+            url_for(
+                "distribution",
+                project_name=canonicalize_name(project_name),
+                version=version,
+                first=first,
+                second=second,
+                rest=rest,
+                distname=distname,
+            ),
+            301,
+        )
+
     dist = _get_dist(first, second, rest, distname)
 
     if dist:
@@ -227,6 +259,21 @@ def mailto_report_link(project_name, version, file_path, request_url):
     "/project/<project_name>/<version>/packages/<first>/<second>/<rest>/<distname>/<path:filepath>"  # noqa
 )
 def file(project_name, version, first, second, rest, distname, filepath):
+    if project_name != canonicalize_name(project_name):
+        return redirect(
+            url_for(
+                "file",
+                project_name=canonicalize_name(project_name),
+                version=version,
+                first=first,
+                second=second,
+                rest=rest,
+                distname=distname,
+                filepath=filepath,
+            ),
+            301,
+        )
+
     dist = _get_dist(first, second, rest, distname)
     if dist:
         try:

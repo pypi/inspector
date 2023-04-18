@@ -22,8 +22,7 @@ serve: .state/docker-build
 #	docker-compose run --rm web flask db upgrade
 
 reformat:
-	docker-compose run --rm web isort -rc inspector #migrations
-	docker-compose run --rm web black inspector #migrations
+	docker-compose run --rm web bin/reformat $(T) $(TESTARGS)
 
 tests: .state/docker-build
 	docker-compose run --rm web bin/tests $(T) $(TESTARGS)
