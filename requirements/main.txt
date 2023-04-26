@@ -4,9 +4,12 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --output-file=requirements/main.txt requirements/main.in
 #
-blinker==1.4 \
-    --hash=sha256:471aee25f3992bd325afa3772f1063dbdbbca947a041b8b89466dc00d606f8b6
-    # via sentry-sdk
+blinker==1.6.2 \
+    --hash=sha256:4afd3de66ef3a9f8067559fb7a1cbe555c17dcbe15971b05d1b625c3e7abe213 \
+    --hash=sha256:c3d739772abb7bc2860abf5f2ec284223d9ad5c76da018234f6f50d6f31ab1f0
+    # via
+    #   flask
+    #   sentry-sdk
 certifi==2022.5.18.1 \
     --hash=sha256:9c5705e395cd70084351dd8ad5c41e65655e08ce46f2ec9cf6c2c08390f71eb7 \
     --hash=sha256:f1d53542ee8cbedbe2118b5686372fb33c297fcd6379b050cca0ef13a597382a
@@ -21,9 +24,9 @@ click==8.1.3 \
     --hash=sha256:7682dc8afb30297001674575ea00d1814d808d6a36af415a82bd481d37ba7b8e \
     --hash=sha256:bb4d8133cb15a609f44e8213d9b391b0809795062913b383c62be0ee95b1db48
     # via flask
-flask==2.2.3 \
-    --hash=sha256:7eb373984bf1c770023fce9db164ed0c3353cd0b53f130f4693da0ca756a2e6d \
-    --hash=sha256:c0bec9477df1cb867e5a67c9e1ab758de9cb4a3e52dd70681f59fa40a62b3f2d
+flask==2.3.1 \
+    --hash=sha256:8ba2a854608fdd603b67dccd4514a46450132227fb9df40127a8d0c1de8769ec \
+    --hash=sha256:a6059db4297106e5a64b3215fa16ae641822c1cb97ecb498573549b2478602cb
     # via
     #   -r requirements/main.in
     #   sentry-sdk
@@ -105,7 +108,7 @@ urllib3==1.26.14 \
     # via
     #   requests
     #   sentry-sdk
-werkzeug==2.2.2 \
-    --hash=sha256:7ea2d48322cc7c0f8b3a215ed73eabd7b5d75d0b50e31ab006286ccff9e00b8f \
-    --hash=sha256:f979ab81f58d7318e064e99c4506445d60135ac5cd2e177a2de0089bfd4c9bd5
+werkzeug==2.3.0 \
+    --hash=sha256:340335057f72974d9281dbaf52c8090a9f9a59ba304ae814bf0656e6559c0020 \
+    --hash=sha256:3b6b46926d052b8ebca97c4dc73c12e47bdd07d57ab0600c039c3155450227bc
     # via flask
