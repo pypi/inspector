@@ -38,6 +38,8 @@ if SENTRY_DSN := os.environ.get("SENTRY_DSN"):
 app = Flask(__name__)
 
 app.jinja_env.filters["unquote"] = lambda u: urllib.parse.unquote(u)
+app.jinja_env.trim_blocks = True
+app.jinja_env.lstrip_blocks = True
 
 # Lightweight datastore ;)
 dists = {}
