@@ -5,50 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
   <body>
-    <h1><a href="/">Inspector</a></h1>
-    {% if h2 %}
-    <h2>
-      {% if h2_link %}
-      <a href="{{ h2_link }}">{{ h2 }}</a>
-      {% else %}
-      {{ h2 }}
+    <main>
+      <h1><a href="/">Inspector</a></h1>
+      {% if h2 %}
+      <h2>
+        {% if h2_link %}
+        <a href="{{ h2_link }}">{{ h2 }}</a>
+        {% else %}
+        {{ h2 }}
+        {% endif %}
+        {% if h2_paren_link %}
+        (<a href="{{ h2_paren_link }}">{{ h2_paren }}</a>)
+        {% endif %}
+      </h2>
       {% endif %}
-      {% if h2_paren_link %}
-      (<a href="{{ h2_paren_link }}">{{ h2_paren }}</a>)
+      {% if h3 %}
+      <h3>
+        {% if h3_link %}
+        <a href="{{ h3_link }}">{{ h3 }}</a>
+        {% else %}
+        {{ h3 }}
+        {% endif %}
+        {% if h3_paren_link %}
+        (<a href="{{ h3_paren_link }}">{{ h3_paren }}</a>)
+        {% endif %}
+      </h3>
       {% endif %}
-    </h2>
-    {% endif %}
-    {% if h3 %}
-    <h3>
-      {% if h3_link %}
-      <a href="{{ h3_link }}">{{ h3 }}</a>
-      {% else %}
-      {{ h3 }}
+      {% if h4 %}
+      <h4>
+        {% if h4_link %}
+        <a href="{{ h4_link }}">{{ h4 }}</a>
+        {% else %}
+        {{ h4 }}
+        {% endif %}
+      </h4>
       {% endif %}
-      {% if h3_paren_link %}
-      (<a href="{{ h3_paren_link }}">{{ h3_paren }}</a>)
+      {% if h5 %}
+      <h5>
+        {% if h5_link %}
+        <a href="{{ h5_link }}">{{ h5 }}</a>
+        {% else %}
+        {{ h5 }}
+        {% endif %}
+      </h5>
       {% endif %}
-    </h3>
-    {% endif %}
-    {% if h4 %}
-    <h4>
-      {% if h4_link %}
-      <a href="{{ h4_link }}">{{ h4 }}</a>
-      {% else %}
-      {{ h4 }}
-      {% endif %}
-    </h4>
-    {% endif %}
-    {% if h5 %}
-    <h5>
-      {% if h5_link %}
-      <a href="{{ h5_link }}">{{ h5 }}</a>
-      {% else %}
-      {{ h5 }}
-      {% endif %}
-    </h5>
-    {% endif %}
-    {% block body %}{% endblock %}
+      {% block body %}{% endblock %}
+    </main>
     <footer>
       <small>Source: <a href="https://github.com/pypi/inspector">https://github.com/pypi/inspector</a></small>
     </footer>
