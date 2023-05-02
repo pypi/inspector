@@ -19,24 +19,24 @@ def decompile(code: bytes) -> str:
     Decompile bytecode using pycdc.
     """
 
-    with tempfile.NamedTemporaryFile() as f:
-        f.write(code)
+    with tempfile.NamedTemporaryFile() as file:
+        file.write(code)
         output = subprocess.Popen(
-            ["pycdc", f.name], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            ["pycdc", file.name], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
 
-        output = b"".join([l for l in output.stdout.readlines()]).decode()
+        output = b"".join([line for line in output.stdout.readlines()]).decode()
 
     return DECOMPILE_HEADER + output
 
 
 def disassemble(code: bytes) -> str:
-    with tempfile.NamedTemporaryFile() as f:
-        f.write(code)
+    with tempfile.NamedTemporaryFile() as file:
+        file.write(code)
         output = subprocess.Popen(
-            ["pycdas", f.name], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            ["pycdas", file.name], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
 
-        disassembly = b"".join([l for l in output.stdout.readlines()]).decode()
+        disassembly = b"".join([line for line in output.stdout.readlines()]).decode()
 
     return DISASM_HEADER + "\n\n" + disassembly
