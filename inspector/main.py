@@ -154,7 +154,7 @@ class TarGzDistribution(Distribution):
         try:
             file_ = self.tarfile.extractfile(filepath)
             if file_:
-                return file_.read().decode()
+                return file_.read()
             else:
                 raise FileNotFoundError
         except KeyError:
