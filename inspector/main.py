@@ -13,7 +13,7 @@ from flask import Flask, Response, abort, redirect, render_template, request, ur
 from packaging.utils import canonicalize_name
 from sentry_sdk.integrations.flask import FlaskIntegration
 
-from .deob import disassemble, decompile
+from .deob import decompile, disassemble
 from .legacy import parse
 
 
