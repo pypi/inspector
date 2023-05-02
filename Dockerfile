@@ -40,3 +40,22 @@ RUN if [ "$DEVEL" = "yes" ]; then pip install -r requirements/dev.txt; fi
 
 # Copy in everything else
 COPY . .
+
+# Install pycdc and pycdas...
+
+RUN apt-get update
+RUN apt-get upgrade -y
+
+RUN apt-get install -y git
+RUN apt-get install -y cmake
+RUN apt-get install -y g++
+
+RUN git clone "https://github.com/zrax/pycdc.git"
+
+WORKDIR ./pycdc
+RUN cmake .
+RUN cmake --build . --config release
+
+RUN mv ./pycdc /usr/local/bin
+RUN mv ./pycdas /usr/local/bin
+RUN rm -rf ./pycdc

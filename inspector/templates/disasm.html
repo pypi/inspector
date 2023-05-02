@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="/static/prism.css">
+{% endblock %}
+
+{% block body %}
+    <a href="{{ mailto_report_link }}" style="color:red"> <strong>Report Malicious Package</strong> </a>
+
+    <div>
+
+        <label for="disassembly-radio">Disassembly</label>
+        <input type="radio" id="disassembly-radio" checked/>
+
+        <label for="decompilation-radio">Decompilation</label>
+        <input type="radio" id="decompilation-radio"/>
+
+    </div>
+<pre id="disassembly">
+<code>{{ disassembly }}</code>
+</pre>
+<pre id="decompilation" class="line-numbers linkable-line-numbers language-python">
+<code class="language-python">{{- decompilation }}</code>
+</pre>
+
+    <script>
+        let disassembly = document.getElementById("disassembly");
+        let decompilation = document.getElementById("decompilation");
+        decompilation.style.display = "none";
+        let disassemblyRadio = document.getElementById("disassembly-radio");
+        let decompilationRadio = document.getElementById("decompilation-radio");
+
+        disassemblyRadio.addEventListener("click", function () {
+            disassembly.style.display = "";
+            decompilation.style.display = "none";
+            decompilationRadio.checked = false;
+            disassemblyRadio.checked = true;
+        });
+
+        decompilationRadio.addEventListener("click", function () {
+            disassembly.style.display = "none";
+            decompilation.style.display = "";
+            disassemblyRadio.checked = false;
+            decompilationRadio.checked = true;
+
+            // line numbers get messed up when changing the display attribute, so we need to refresh them...
+            Prism.plugins.lineNumbers.resize(decompilation)
+        });
+    </script>
+
+    <script src="/static/prism.js"></script>
+{% endblock %}
