@@ -10,10 +10,10 @@
     <div>
 
         <label for="disassembly-radio">Disassembly</label>
-        <input type="radio" id="disassembly-radio" checked/>
+        <input type="radio" id="disassembly-radio" name="view-mode" checked/>
 
         <label for="decompilation-radio">Decompilation</label>
-        <input type="radio" id="decompilation-radio"/>
+        <input type="radio" id="decompilation-radio" name="view-mode"/>
 
     </div>
 <pre id="disassembly">
@@ -33,15 +33,11 @@
         disassemblyRadio.addEventListener("click", function () {
             disassembly.style.display = "";
             decompilation.style.display = "none";
-            decompilationRadio.checked = false;
-            disassemblyRadio.checked = true;
         });
 
         decompilationRadio.addEventListener("click", function () {
             disassembly.style.display = "none";
             decompilation.style.display = "";
-            disassemblyRadio.checked = false;
-            decompilationRadio.checked = true;
 
             // line numbers get messed up when changing the display attribute, so we need to refresh them...
             Prism.plugins.lineNumbers.resize(decompilation)
