@@ -313,7 +313,7 @@ def file(project_name, version, first, second, rest, distname, filepath):
                 **common_params,
             )
 
-        elif file_extension == "py":
+        elif file_extension == "py" and isinstance(contents, bytes):
             try:
                 contents = contents.decode()
             except UnicodeDecodeError:
