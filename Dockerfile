@@ -23,19 +23,26 @@ WORKDIR /app
 #    && apt-get install --no-install-recommends -y \
 #        $(if [ "$DEVEL" = "yes" ]; then echo 'bash postgresql-client'; fi) \
 #    && apt-get clean \
-#    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-#    && apt-get update \
-#    && apt-get upgrade -y \
-#    && apt-get install -y git \
-#    && apt-get install -y cmake \
-#    && apt-get install -y g++ \
-#    && git clone "https://github.com/zrax/pycdc.git" \
-#    && cd ./pycdc \
-#    && cmake . \
-#    && cmake --build . --config release \
-#    && mv ./pycdc /usr/local/bin \
-#    && mv ./pycdas /usr/local/bin \
-#    && rm -rf ./pycdc
+#    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Install pycdc and pycdas...
+RUN apt-get update
+RUN apt-get upgrade -y
+
+RUN apt-get install -y git
+RUN apt-get install -y cmake
+RUN apt-get install -y g++
+
+RUN git clone "https://github.com/zrax/pycdc.git"
+
+WORKDIR ./pycdc
+RUN cmake .
+RUN cmake --build . --config release
+
+RUN mv ./pycdc /usr/local/bin
+RUN mv ./pycdas /usr/local/bin
+RUN rm -rf ./pycdc
+
 
 # Copy in requirements files
 COPY ./requirements ./requirements
