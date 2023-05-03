@@ -18,31 +18,23 @@ WORKDIR /app
 
 # Install System level requirements, this is done before everything else
 # because these are rarely ever going to change.
-#RUN set -x \
-#    && apt-get update \
-#    && apt-get install --no-install-recommends -y \
+RUN set -x \
+    && apt-get update \
+    && apt-get install -y \
+        git cmake g++ \
 #        $(if [ "$DEVEL" = "yes" ]; then echo 'bash postgresql-client'; fi) \
-#    && apt-get clean \
-#    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install pycdc and pycdas...
-RUN apt-get update
-RUN apt-get upgrade -y
-
-RUN apt-get install -y git
-RUN apt-get install -y cmake
-RUN apt-get install -y g++
-
 RUN git clone "https://github.com/zrax/pycdc.git"
 
 WORKDIR ./pycdc
 RUN cmake .
 RUN cmake --build . --config release
-
 RUN mv ./pycdc /usr/local/bin
 RUN mv ./pycdas /usr/local/bin
 RUN rm -rf ./pycdc
-
 
 # Copy in requirements files
 COPY ./requirements ./requirements
