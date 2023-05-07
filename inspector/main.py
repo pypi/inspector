@@ -213,6 +213,16 @@ def distribution(project_name, version, first, second, rest, distname):
 
     dist = _get_dist(first, second, rest, distname)
 
+    h2_paren = "View this project on PyPI"
+    resp = requests.get(f"https://pypi.org/pypi/{project_name}/json")
+    if resp.status_code == 404:
+        h2_paren = "❌ Project no longer on PyPI"
+
+    h3_paren = "View this release on PyPI"
+    resp = requests.get(f"https://pypi.org/pypi/{project_name}/{version}/json")
+    if resp.status_code == 404:
+        h3_paren = "❌ Release no longer on PyPI"
+
     if dist:
         file_urls = [
             "./" + urllib.parse.quote(filename) for filename in dist.namelist()
@@ -222,11 +232,11 @@ def distribution(project_name, version, first, second, rest, distname):
             links=file_urls,
             h2=f"{project_name}",
             h2_link=f"/project/{project_name}",
-            h2_paren="View this project on PyPI",
+            h2_paren=h2_paren,
             h2_paren_link=f"https://pypi.org/project/{project_name}",
             h3=f"{project_name}=={version}",
             h3_link=f"/project/{project_name}/{version}",
-            h3_paren="View this release on PyPI",
+            h3_paren=h3_paren,
             h3_paren_link=f"https://pypi.org/project/{project_name}/{version}",
             h4=distname,
             h4_link=f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/",  # noqa
@@ -277,6 +287,16 @@ def file(project_name, version, first, second, rest, distname, filepath):
             301,
         )
 
+    h2_paren = "View this project on PyPI"
+    resp = requests.get(f"https://pypi.org/pypi/{project_name}/json")
+    if resp.status_code == 404:
+        h2_paren = "❌ Project no longer on PyPI"
+
+    h3_paren = "View this release on PyPI"
+    resp = requests.get(f"https://pypi.org/pypi/{project_name}/{version}/json")
+    if resp.status_code == 404:
+        h3_paren = "❌ Release no longer on PyPI"
+
     dist = _get_dist(first, second, rest, distname)
     if dist:
         try:
@@ -290,11 +310,11 @@ def file(project_name, version, first, second, rest, distname, filepath):
             "mailto_report_link": report_link,
             "h2": f"{project_name}",
             "h2_link": f"/project/{project_name}",
-            "h2_paren": "View this project on PyPI",
+            "h2_paren": h2_paren,
             "h2_paren_link": f"https://pypi.org/project/{project_name}",
             "h3": f"{project_name}=={version}",
             "h3_link": f"/project/{project_name}/{version}",
-            "h3_paren": "View this release on PyPI",
+            "h3_paren": h3_paren,
             "h3_paren_link": f"https://pypi.org/project/{project_name}/{version}",
             "h4": distname,
             "h4_link": f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/",  # noqa
