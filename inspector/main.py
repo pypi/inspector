@@ -13,6 +13,7 @@ from flask import Flask, Response, abort, redirect, render_template, request, ur
 from packaging.utils import canonicalize_name
 from sentry_sdk.integrations.flask import FlaskIntegration
 
+from .deob import decompile, disassemble
 from .legacy import parse
 
 
@@ -134,9 +135,9 @@ class ZipDistribution(Distribution):
     def namelist(self):
         return [i.filename for i in self.zipfile.infolist() if not i.is_dir()]
 
-    def contents(self, filepath):
+    def contents(self, filepath) -> bytes:
         try:
-            return self.zipfile.read(filepath).decode()
+            return self.zipfile.read(filepath)
         except KeyError:
             raise FileNotFoundError
 
@@ -153,7 +154,7 @@ class TarGzDistribution(Distribution):
         try:
             file_ = self.tarfile.extractfile(filepath)
             if file_:
-                return file_.read().decode()
+                return file_.read()
             else:
                 raise FileNotFoundError
         except KeyError:
@@ -212,6 +213,16 @@ def distribution(project_name, version, first, second, rest, distname):
 
     dist = _get_dist(first, second, rest, distname)
 
+    h2_paren = "View this project on PyPI"
+    resp = requests.get(f"https://pypi.org/pypi/{project_name}/json")
+    if resp.status_code == 404:
+        h2_paren = "❌ Project no longer on PyPI"
+
+    h3_paren = "View this release on PyPI"
+    resp = requests.get(f"https://pypi.org/pypi/{project_name}/{version}/json")
+    if resp.status_code == 404:
+        h3_paren = "❌ Release no longer on PyPI"
+
     if dist:
         file_urls = [
             "./" + urllib.parse.quote(filename) for filename in dist.namelist()
@@ -221,11 +232,11 @@ def distribution(project_name, version, first, second, rest, distname):
             links=file_urls,
             h2=f"{project_name}",
             h2_link=f"/project/{project_name}",
-            h2_paren="View this project on PyPI",
+            h2_paren=h2_paren,
             h2_paren_link=f"https://pypi.org/project/{project_name}",
             h3=f"{project_name}=={version}",
             h3_link=f"/project/{project_name}/{version}",
-            h3_paren="View this release on PyPI",
+            h3_paren=h3_paren,
             h3_paren_link=f"https://pypi.org/project/{project_name}/{version}",
             h4=distname,
             h4_link=f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/",  # noqa
@@ -276,33 +287,59 @@ def file(project_name, version, first, second, rest, distname, filepath):
             301,
         )
 
+    h2_paren = "View this project on PyPI"
+    resp = requests.get(f"https://pypi.org/pypi/{project_name}/json")
+    if resp.status_code == 404:
+        h2_paren = "❌ Project no longer on PyPI"
+
+    h3_paren = "View this release on PyPI"
+    resp = requests.get(f"https://pypi.org/pypi/{project_name}/{version}/json")
+    if resp.status_code == 404:
+        h3_paren = "❌ Release no longer on PyPI"
+
     dist = _get_dist(first, second, rest, distname)
     if dist:
         try:
             contents = dist.contents(filepath)
-        except UnicodeDecodeError:
-            return "Binary files are not supported"
         except FileNotFoundError:
             return abort(404)
-
+        file_extension = filepath.split(".")[-1]
         report_link = mailto_report_link(project_name, version, filepath, request.url)
-        return render_template(
-            "code.html",
-            code=contents,
-            mailto_report_link=report_link,
-            h2=f"{project_name}",
-            h2_link=f"/project/{project_name}",
-            h2_paren="View this project on PyPI",
-            h2_paren_link=f"https://pypi.org/project/{project_name}",
-            h3=f"{project_name}=={version}",
-            h3_link=f"/project/{project_name}/{version}",
-            h3_paren="View this release on PyPI",
-            h3_paren_link=f"https://pypi.org/project/{project_name}/{version}",
-            h4=distname,
-            h4_link=f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/",  # noqa
-            h5=filepath,
-            h5_link=f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/{filepath}",  # noqa
-        )
+
+        common_params = {
+            "mailto_report_link": report_link,
+            "h2": f"{project_name}",
+            "h2_link": f"/project/{project_name}",
+            "h2_paren": h2_paren,
+            "h2_paren_link": f"https://pypi.org/project/{project_name}",
+            "h3": f"{project_name}=={version}",
+            "h3_link": f"/project/{project_name}/{version}",
+            "h3_paren": h3_paren,
+            "h3_paren_link": f"https://pypi.org/project/{project_name}/{version}",
+            "h4": distname,
+            "h4_link": f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/",  # noqa
+            "h5": filepath,
+            "h5_link": f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/{filepath}",  # noqa
+        }
+
+        if file_extension in ["pyc", "pyo"]:
+            disassembly = disassemble(contents)
+            decompilation = decompile(contents)
+
+            return render_template(
+                "disasm.html",
+                disassembly=disassembly,
+                decompilation=decompilation,
+                **common_params,
+            )
+
+        if isinstance(contents, bytes):
+            try:
+                contents = contents.decode()
+            except UnicodeDecodeError:
+                return "Binary files are not supported."
+
+        return render_template("code.html", code=contents, **common_params)
     else:
         return "Distribution type not supported"
 
