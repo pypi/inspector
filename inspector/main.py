@@ -60,8 +60,6 @@ def index():
 
 @app.route("/project/<project_name>/")
 def versions(project_name):
-    if project := request.args.get("project"):
-        return redirect(f"/project/{project}")
     if project_name != canonicalize_name(project_name):
         return redirect(
             url_for("versions", project_name=canonicalize_name(project_name)), 301
@@ -89,8 +87,6 @@ def versions(project_name):
 
 @app.route("/project/<project_name>/<version>/")
 def distributions(project_name, version):
-    if project := request.args.get("project"):
-        return redirect(f"/project/{project}")
     if project_name != canonicalize_name(project_name):
         return redirect(
             url_for(
@@ -201,8 +197,6 @@ def _get_dist(first, second, rest, distname):
     "/project/<project_name>/<version>/packages/<first>/<second>/<rest>/<distname>/"
 )
 def distribution(project_name, version, first, second, rest, distname):
-    if project := request.args.get("project"):
-        return redirect(f"/project/{project}")
     if project_name != canonicalize_name(project_name):
         return redirect(
             url_for(
@@ -278,8 +272,6 @@ def mailto_report_link(project_name, version, file_path, request_url):
     "/project/<project_name>/<version>/packages/<first>/<second>/<rest>/<distname>/<path:filepath>"  # noqa
 )
 def file(project_name, version, first, second, rest, distname, filepath):
-    if project := request.args.get("project"):
-        return redirect(f"/project/{project}")
     if project_name != canonicalize_name(project_name):
         return redirect(
             url_for(
