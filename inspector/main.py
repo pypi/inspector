@@ -339,7 +339,7 @@ def file(project_name, version, first, second, rest, distname, filepath):
             except UnicodeDecodeError:
                 return "Binary files are not supported."
 
-        return render_template("code.html", code=contents, **common_params)
+        return render_template("code.html", code=contents, name=file_extension, **common_params)
     else:
         return "Distribution type not supported"
 

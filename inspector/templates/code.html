@@ -6,8 +6,8 @@
 
 {% block body %}
 <a href="{{ mailto_report_link }}" style="color:red"> <strong>Report Malicious Package</strong> </a>
-<pre id="line" class="line-numbers linkable-line-numbers language-python">
-<code class="language-python">{{- code }}</code>
+<pre id="line" class="line-numbers linkable-line-numbers language-{{ name }}">
+<code class="language-{{ name }}">{{- code }}</code>
 </pre>
 <script src="/static/prism.js"></script>
 {% endblock %}
