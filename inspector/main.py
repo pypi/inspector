@@ -157,7 +157,7 @@ class TarGzDistribution(Distribution):
                 return file_.read()
             else:
                 raise FileNotFoundError
-        except KeyError:
+        except (KeyError, EOFError):
             raise FileNotFoundError
 
 
