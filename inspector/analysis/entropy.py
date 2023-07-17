@@ -1,5 +1,6 @@
-from math import log2
 import collections
+
+from math import log2
 
 
 def shannon_entropy(X: bytes):

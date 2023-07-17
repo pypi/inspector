@@ -27,12 +27,14 @@ class Detail:
                 color = "#000000"
 
         # just to be safe here, sanitize the property name and value...
-        propname_sanitized = self.prop_name if self.unsafe else jinja2.filters.escape(self.prop_name)
+        propname_sanitized = (
+            self.prop_name if self.unsafe else jinja2.filters.escape(self.prop_name)
+        )
 
         if self.value:
-            value_sanitized = self.value if self.unsafe else jinja2.filters.escape(self.value)
+            value_sanitized = (
+                self.value if self.unsafe else jinja2.filters.escape(self.value)
+            )
             return f"<strong>{propname_sanitized}</strong>: <span style='color: {color};'>{value_sanitized}</span>"
 
         return f"<strong><span style='color: {color};'>{propname_sanitized}</span></strong>"
-
-

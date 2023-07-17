@@ -1,5 +1,5 @@
-from typing import Generator, Any
 from hashlib import sha256
+from typing import Any, Generator
 
 from inspector.analysis.codedetails import Detail, DetailSeverity
 from inspector.analysis.entropy import shannon_entropy
@@ -10,13 +10,15 @@ def __is_compiled(filepath: str) -> bool:
     return filepath.endswith(".pyc") or filepath.endswith(".pyo")
 
 
-def basic_details(distribution: TarGzDistribution | ZipDistribution, filepath: str) -> Generator[Detail, Any, None]:
+def basic_details(
+    distribution: TarGzDistribution | ZipDistribution, filepath: str
+) -> Generator[Detail, Any, None]:
     contents = distribution.contents(filepath)
 
     yield Detail(
         severity=DetailSeverity.NORMAL,
         prop_name="SHA-256",
-        value=sha256(contents).hexdigest()
+        value=sha256(contents).hexdigest(),
     )
 
     entropy = shannon_entropy(contents)
@@ -24,11 +26,10 @@ def basic_details(distribution: TarGzDistribution | ZipDistribution, filepath: s
     yield Detail(
         severity=DetailSeverity.HIGH if ent_suspicious else DetailSeverity.NORMAL,
         prop_name="Entropy",
-        value=str(entropy) + " (HIGH)" if ent_suspicious else str(entropy)
+        value=str(entropy) + " (HIGH)" if ent_suspicious else str(entropy),
     )
 
     if __is_compiled(filepath):
         yield Detail(
-            severity=DetailSeverity.MEDIUM,
-            prop_name="Compiled Python Bytecode"
+            severity=DetailSeverity.MEDIUM, prop_name="Compiled Python Bytecode"
         )
