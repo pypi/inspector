@@ -1,9 +1,5 @@
 import os
-import tarfile
 import urllib.parse
-import zipfile
-
-from io import BytesIO
 
 import gunicorn.http.errors
 import requests
@@ -13,8 +9,11 @@ from flask import Flask, Response, abort, redirect, render_template, request, ur
 from packaging.utils import canonicalize_name
 from sentry_sdk.integrations.flask import FlaskIntegration
 
+from .analysis.checks import basic_details
 from .deob import decompile, disassemble
+from .distribution import _get_dist
 from .legacy import parse
+from .utilities import mailto_report_link
 
 
 def traces_sampler(sampling_context):
@@ -41,9 +40,6 @@ app = Flask(__name__)
 app.jinja_env.filters["unquote"] = lambda u: urllib.parse.unquote(u)
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
-
-# Lightweight datastore ;)
-dists = {}
 
 
 @app.errorhandler(gunicorn.http.errors.ParseException)
@@ -119,80 +115,6 @@ def distributions(project_name, version):
     )
 
 
-class Distribution:
-    def namelist(self):
-        raise NotImplementedError
-
-    def read(self):
-        raise NotImplementedError
-
-
-class ZipDistribution(Distribution):
-    def __init__(self, f):
-        f.seek(0)
-        self.zipfile = zipfile.ZipFile(f)
-
-    def namelist(self):
-        return [i.filename for i in self.zipfile.infolist() if not i.is_dir()]
-
-    def contents(self, filepath) -> bytes:
-        try:
-            return self.zipfile.read(filepath)
-        except KeyError:
-            raise FileNotFoundError
-
-
-class TarGzDistribution(Distribution):
-    def __init__(self, f):
-        f.seek(0)
-        self.tarfile = tarfile.open(fileobj=f, mode="r:gz")
-
-    def namelist(self):
-        return [i.name for i in self.tarfile.getmembers() if not i.isdir()]
-
-    def contents(self, filepath):
-        try:
-            file_ = self.tarfile.extractfile(filepath)
-            if file_:
-                return file_.read()
-            else:
-                raise FileNotFoundError
-        except (KeyError, EOFError):
-            raise FileNotFoundError
-
-
-def _get_dist(first, second, rest, distname):
-    if distname in dists:
-        return dists[distname]
-
-    url = f"https://files.pythonhosted.org/packages/{first}/{second}/{rest}/{distname}"
-    try:
-        resp = requests.get(url, stream=True)
-        resp.raise_for_status()
-    except requests.HTTPError as exc:
-        abort(exc.response.status_code)
-
-    f = BytesIO(resp.content)
-
-    if (
-        distname.endswith(".whl")
-        or distname.endswith(".zip")
-        or distname.endswith(".egg")
-    ):
-        distfile = ZipDistribution(f)
-        dists[distname] = distfile
-        return distfile
-
-    elif distname.endswith(".tar.gz"):
-        distfile = TarGzDistribution(f)
-        dists[distname] = distfile
-        return distfile
-
-    else:
-        # Not supported
-        return None
-
-
 @app.route(
     "/project/<project_name>/<version>/packages/<first>/<second>/<rest>/<distname>/"
 )
@@ -243,29 +165,6 @@ def distribution(project_name, version, first, second, rest, distname):
         )
     else:
         return "Distribution type not supported"
-
-
-def mailto_report_link(project_name, version, file_path, request_url):
-    """
-    Generate a mailto report link for malicious code.
-    """
-    message_body = (
-        "PyPI Malicious Package Report\n"
-        "--\n"
-        f"Package Name: {project_name}\n"
-        f"Version: {version}\n"
-        f"File Path: {file_path}\n"
-        f"Inspector URL: {request_url}\n\n"
-        "Additional Information:\n\n"
-    )
-
-    subject = f"Malicious Package Report: {project_name}"
-
-    return (
-        f"mailto:security@pypi.org?"
-        f"subject={urllib.parse.quote(subject)}"
-        f"&body={urllib.parse.quote(message_body)}"
-    )
 
 
 @app.route(
@@ -325,7 +224,6 @@ def file(project_name, version, first, second, rest, distname, filepath):
         if file_extension in ["pyc", "pyo"]:
             disassembly = disassemble(contents)
             decompilation = decompile(contents)
-
             return render_template(
                 "disasm.html",
                 disassembly=disassembly,
