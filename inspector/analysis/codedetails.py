@@ -35,6 +35,13 @@ class Detail:
             value_sanitized = (
                 self.value if self.unsafe else jinja2.filters.escape(self.value)
             )
-            return f"<strong>{propname_sanitized}</strong>: <span style='color: {color};'>{value_sanitized}</span>"
+            return (
+                f"<strong>{propname_sanitized}</strong>: "
+                f"<span style='color: {color};'>{value_sanitized}</span>"
+            )
 
-        return f"<strong><span style='color: {color};'>{propname_sanitized}</span></strong>"
+        return (
+            f"<strong><span style='color: {color};'>"
+            f"{propname_sanitized}"
+            f"</span></strong>"
+        )
