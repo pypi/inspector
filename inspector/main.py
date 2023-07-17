@@ -205,7 +205,9 @@ def file(project_name, version, first, second, rest, distname, filepath):
         file_extension = filepath.split(".")[-1]
         report_link = mailto_report_link(project_name, version, filepath, request.url)
 
+        details = [detail.html() for detail in basic_details(dist, filepath)]
         common_params = {
+            "file_details": details,
             "mailto_report_link": report_link,
             "h2": f"{project_name}",
             "h2_link": f"/project/{project_name}",

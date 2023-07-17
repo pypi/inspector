@@ -1,0 +1,15 @@
+
+.analysis-summary {
+    border: 1px solid black;
+    float: right;
+    width: 40%;
+}
+
+.header-group {
+    display: inline-block;
+}
+
+.report-anchor {
+    display: block;
+    color: red;
+}

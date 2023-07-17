@@ -2,10 +2,22 @@
 
 {% block head %}
 <link rel="stylesheet" type="text/css" href="/static/prism.css">
+<link rel="stylesheet" type="text/css" href="/static/style.css">
+{% endblock %}
+
+{% block above_body %}
+    <fieldset class="analysis-summary">
+        <legend><strong>Summary</strong></legend>
+        <ul>
+            {% for detail in file_details %}
+                <li>{{ detail|safe }}</li>
+            {% endfor %}
+        </ul>
+    </fieldset>
 {% endblock %}
 
 {% block body %}
-<a href="{{ mailto_report_link }}" style="color:red"> <strong>Report Malicious Package</strong> </a>
+<a href="{{ mailto_report_link }}" class="report-anchor"> <strong>Report Malicious Package</strong> </a>
 <pre id="line" class="line-numbers linkable-line-numbers language-{{ name }}">
 <code class="language-{{ name }}">{{- code }}</code>
 </pre>
