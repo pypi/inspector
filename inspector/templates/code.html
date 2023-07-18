@@ -19,8 +19,9 @@
 {% block body %}
 <a href="{{ mailto_report_link }}" class="report-anchor"> <strong>Report Malicious Package</strong> </a>
 
+{# Indenting the below <code> tag will cause rendering issues! #}
 <pre id="line" class="line-numbers linkable-line-numbers language-{{ name }}">
-    <code class="language-{{ name }}">{{- code }}</code>
+<code class="language-{{ name }}">{{- code }}</code>
 </pre>
 
 <script src="/static/prism.js"></script>
