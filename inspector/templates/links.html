@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<ul>
-{% for link in links %}
-  <li><a href="{{ link }}">{{ link|unquote}}</a></li>
-{% endfor %}
-</ul>
+    <ul>
+        {% for link in links %}
+            <li><a href="{{ link }}">{{ link|unquote }}</a></li>
+        {% endfor %}
+    </ul>
 {% endblock %}
