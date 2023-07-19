@@ -1,18 +1,18 @@
 {% extends 'base.html' %}
 
 {% block head %}
-    <link rel="stylesheet" type="text/css" href="/static/prism.css">
-    <link rel="stylesheet" type="text/css" href="/static/style.css">
+  <link rel="stylesheet" type="text/css" href="/static/prism.css">
+  <link rel="stylesheet" type="text/css" href="/static/style.css">
 {% endblock %}
 
 {% block above_body %}
 <fieldset class="analysis-summary">
-    <legend><strong>Summary</strong></legend>
-    <ul>
-        {% for detail in file_details %}
-            <li>{{ detail|safe }}</li>
-        {% endfor %}
-    </ul>
+  <legend><strong>Summary</strong></legend>
+  <ul>
+    {% for detail in file_details %}
+      <li>{{ detail|safe }}</li>
+    {% endfor %}
+  </ul>
 </fieldset>
 {% endblock %}
 

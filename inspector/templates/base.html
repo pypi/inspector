@@ -1,70 +1,70 @@
 <html>
 <head>
-{% block head %}{% endblock %}
-<link rel="icon"
-      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🕵️</text></svg>">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% block head %}{% endblock %}
+  <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🕵️</text></svg>">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 <main>
-    <h1><a href="/">Inspector</a></h1>
-    <form action="/">
-        {% if h2 %}
-            <input type="text" name="project" placeholder="Project name" value="{{ h2 }}" autocomplete="off">
-        {% else %}
-            <input type="text" name="project" placeholder="Project name" autocomplete="off">
-        {% endif %}
-        <input type="submit">
-    </form>
-    <hr>
-    {% block above_body %}{% endblock %}
+  <h1><a href="/">Inspector</a></h1>
+  <form action="/">
     {% if h2 %}
-        <h2>
-            {% if h2_link %}
-                <a href="{{ h2_link }}">{{ h2 }}</a>
-            {% else %}
-                {{ h2 }}
-            {% endif %}
-            {% if h2_paren_link %}
-                (<a href="{{ h2_paren_link }}">{{ h2_paren }}</a>)
-            {% endif %}
-        </h2>
+      <input type="text" name="project" placeholder="Project name" value="{{ h2 }}" autocomplete="off">
+    {% else %}
+      <input type="text" name="project" placeholder="Project name" autocomplete="off">
     {% endif %}
-    {% if h3 %}
-        <h3>
-            {% if h3_link %}
-                <a href="{{ h3_link }}">{{ h3 }}</a>
-            {% else %}
-                {{ h3 }}
-            {% endif %}
-            {% if h3_paren_link %}
-                (<a href="{{ h3_paren_link }}">{{ h3_paren }}</a>)
-            {% endif %}
-        </h3>
-    {% endif %}
-    {% if h4 %}
-        <h4>
-            {% if h4_link %}
-                <a href="{{ h4_link }}">{{ h4 }}</a>
-            {% else %}
-                {{ h4 }}
-            {% endif %}
-        </h4>
-    {% endif %}
-    {% if h5 %}
-        <h5>
-            {% if h5_link %}
-                <a href="{{ h5_link }}">{{ h5 }}</a>
-            {% else %}
-                {{ h5 }}
-            {% endif %}
-        </h5>
-    {% endif %}
-    {% block body %}{% endblock %}
+    <input type="submit">
+  </form>
+  <hr>
+  {% block above_body %}{% endblock %}
+  {% if h2 %}
+    <h2>
+      {% if h2_link %}
+        <a href="{{ h2_link }}">{{ h2 }}</a>
+      {% else %}
+        {{ h2 }}
+      {% endif %}
+      {% if h2_paren_link %}
+        (<a href="{{ h2_paren_link }}">{{ h2_paren }}</a>)
+      {% endif %}
+    </h2>
+  {% endif %}
+  {% if h3 %}
+    <h3>
+      {% if h3_link %}
+        <a href="{{ h3_link }}">{{ h3 }}</a>
+      {% else %}
+        {{ h3 }}
+      {% endif %}
+      {% if h3_paren_link %}
+        (<a href="{{ h3_paren_link }}">{{ h3_paren }}</a>)
+      {% endif %}
+    </h3>
+  {% endif %}
+  {% if h4 %}
+    <h4>
+      {% if h4_link %}
+        <a href="{{ h4_link }}">{{ h4 }}</a>
+      {% else %}
+        {{ h4 }}
+      {% endif %}
+    </h4>
+  {% endif %}
+  {% if h5 %}
+    <h5>
+      {% if h5_link %}
+        <a href="{{ h5_link }}">{{ h5 }}</a>
+      {% else %}
+        {{ h5 }}
+      {% endif %}
+    </h5>
+  {% endif %}
+  {% block body %}{% endblock %}
 </main>
 
 <footer>
-<small>Source: <a href="https://github.com/pypi/inspector">https://github.com/pypi/inspector</a></small>
+  <small>Source: <a href="https://github.com/pypi/inspector">https://github.com/pypi/inspector</a></small>
 </footer>
 
 </body>

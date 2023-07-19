@@ -2,8 +2,8 @@
 
 {% block body %}
 <ul>
-    {% for link in links %}
-        <li><a href="{{ link }}">{{ link|unquote }}</a></li>
-    {% endfor %}
+{% for link in links %}
+  <li><a href="{{ link }}">{{ link|unquote }}</a></li>
+{% endfor %}
 </ul>
 {% endblock %}

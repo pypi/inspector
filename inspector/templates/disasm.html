@@ -7,12 +7,12 @@
 
 {% block above_body %}
 <fieldset class="analysis-summary">
-    <legend><strong>Summary</strong></legend>
-    <ul>
-        {% for detail in file_details %}
-            <li>{{ detail|safe }}</li>
-        {% endfor %}
-    </ul>
+  <legend><strong>Summary</strong></legend>
+  <ul>
+    {% for detail in file_details %}
+      <li>{{ detail|safe }}</li>
+    {% endfor %}
+  </ul>
 </fieldset>
 {% endblock %}
 
@@ -21,11 +21,11 @@
 <br>
 <br>
 <div>
-    <label for="disassembly-radio">Disassembly</label>
-    <input type="radio" id="disassembly-radio" name="view-mode" checked/>
+  <label for="disassembly-radio">Disassembly</label>
+  <input type="radio" id="disassembly-radio" name="view-mode" checked/>
 
-    <label for="decompilation-radio">Decompilation</label>
-    <input type="radio" id="decompilation-radio" name="view-mode"/>
+  <label for="decompilation-radio">Decompilation</label>
+  <input type="radio" id="decompilation-radio" name="view-mode"/>
 </div>
 
 {# Indenting the below <code> tags will cause rendering issues! #}
