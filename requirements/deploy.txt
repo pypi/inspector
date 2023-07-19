@@ -4,13 +4,11 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --output-file=requirements/deploy.txt requirements/deploy.in
 #
-gunicorn==20.1.0 \
-    --hash=sha256:9dcc4547dbb1cb284accfb15ab5667a0e5d1881cc443e0677b4882a4067a807e \
-    --hash=sha256:e0a968b5ba15f8a328fdfd7ab1fcb5af4470c28aaf7e55df02a99bc13138e6e8
+gunicorn==21.1.0 \
+    --hash=sha256:11fc98ea214a5845f614891e8c90b0211fbe595e677d204d7cd7d80f6f348891 \
+    --hash=sha256:37ced4b6622f263a6483eb7cbe9606df81afd57dc0fa464883600624790271c5
     # via -r requirements/deploy.in
-
-# The following packages are considered to be unsafe in a requirements file:
-setuptools==62.3.2 \
-    --hash=sha256:68e45d17c9281ba25dc0104eadd2647172b3472d9e01f911efa57965e8d51a36 \
-    --hash=sha256:a43bdedf853c670e5fed28e5623403bad2f73cf02f9a2774e91def6bda8265a7
+packaging==23.1 \
+    --hash=sha256:994793af429502c4ea2ebf6bf664629d07c1a9fe974af92966e4b8d2df7edc61 \
+    --hash=sha256:a392980d2b6cffa644431898be54b0045151319d1e7ec34f0cfed48767dd334f
     # via gunicorn
