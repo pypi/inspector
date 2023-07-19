@@ -1,62 +1,61 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<link rel="stylesheet" type="text/css" href="/static/prism.css">
-<link rel="stylesheet" type="text/css" href="/static/style.css">
+    <link rel="stylesheet" type="text/css" href="/static/prism.css">
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
 {% endblock %}
 
 {% block above_body %}
-<fieldset class="analysis-summary">
-  <legend><strong>Summary</strong></legend>
-  <ul>
-    {% for detail in file_details %}
-      <li>{{ detail|safe }}</li>
-    {% endfor %}
-  </ul>
-</fieldset>
+    <fieldset class="analysis-summary">
+        <legend><strong>Summary</strong></legend>
+        <ul>
+            {% for detail in file_details %}
+                <li>{{ detail|safe }}</li>
+            {% endfor %}
+        </ul>
+    </fieldset>
 {% endblock %}
 
 {% block body %}
-<a href="{{ mailto_report_link }}" style="color:red"> <strong>Report Malicious Package</strong> </a>
-<br>
-<br>
-<div>
-  <label for="disassembly-radio">Disassembly</label>
-  <input type="radio" id="disassembly-radio" name="view-mode" checked/>
+    <a href="{{ mailto_report_link }}" style="color:red"> <strong>Report Malicious Package</strong> </a>
+    <br>
+    <br>
+    <div>
 
-  <label for="decompilation-radio">Decompilation</label>
-  <input type="radio" id="decompilation-radio" name="view-mode"/>
-</div>
+        <label for="disassembly-radio">Disassembly</label>
+        <input type="radio" id="disassembly-radio" name="view-mode" checked/>
 
-{# Indenting the below <code> tags will cause rendering issues! #}
-
+        <label for="decompilation-radio">Decompilation</label>
+        <input type="radio" id="decompilation-radio" name="view-mode"/>
+    </div>
 <pre id="disassembly">
+{# Indenting the below <code> tags will cause rendering issues! #}
 <code>{{- disassembly }}</code>
 </pre>
-
 <pre id="decompilation" style="display: none" class="line-numbers linkable-line-numbers language-python">
+{# Indenting the below <code> tags will cause rendering issues! #}
 <code class="language-python">{{- decompilation }}</code>
 </pre>
 
-<script>
-    let disassembly = document.getElementById("disassembly");
-    let decompilation = document.getElementById("decompilation");
-    let disassemblyRadio = document.getElementById("disassembly-radio");
-    let decompilationRadio = document.getElementById("decompilation-radio");
+    <script>
+        let disassembly = document.getElementById("disassembly");
+        let decompilation = document.getElementById("decompilation");
+        let disassemblyRadio = document.getElementById("disassembly-radio");
+        let decompilationRadio = document.getElementById("decompilation-radio");
 
-    disassemblyRadio.addEventListener("click", function () {
-        disassembly.style.display = "";
-        decompilation.style.display = "none";
-    });
+        disassemblyRadio.addEventListener("click", function () {
+            disassembly.style.display = "";
+            decompilation.style.display = "none";
+        });
 
-    decompilationRadio.addEventListener("click", function () {
-        disassembly.style.display = "none";
-        decompilation.style.display = "";
+        decompilationRadio.addEventListener("click", function () {
+            disassembly.style.display = "none";
+            decompilation.style.display = "";
 
-        // line numbers get messed up when changing the display attribute, so we need to refresh them...
-        Prism.plugins.lineNumbers.resize(decompilation)
-    });
-</script>
+            // line numbers get messed up when changing the display attribute, so we need to refresh them...
+            Prism.plugins.lineNumbers.resize(decompilation)
+        });
+    </script>
 
-<script src="/static/prism.js"></script>
+    <script src="/static/prism.js"></script>
 {% endblock %}
