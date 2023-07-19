@@ -3,6 +3,7 @@
     border: 1px solid black;
     float: right;
     width: 40%;
+    min-width: 630px;
 }
 
 .header-group {
