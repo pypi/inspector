@@ -14,3 +14,7 @@
     display: block;
     color: red;
 }
+
+#line {
+    white-space: break-spaces;
+}
