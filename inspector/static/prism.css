@@ -216,6 +216,8 @@ pre[class*=language-].line-numbers>code {
 }
 
 .line-numbers .line-numbers-rows {
+    word-wrap: normal;
+    word-break: keep-all;
     position: absolute;
     pointer-events: none;
     top: 0;
