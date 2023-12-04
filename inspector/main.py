@@ -67,13 +67,15 @@ def versions(project_name):
     if resp.status_code != 200:
         return redirect(pypi_project_url, 307)
 
-    version_urls = [
-        "." + "/" + str(version)
-        for version in sorted(resp.json()["releases"].keys(), key=parse, reverse=True)
-    ]
+    releases = resp.json()["releases"]
+    sorted_releases = {
+        version: releases[version]
+        for version in sorted(releases.keys(), key=parse, reverse=True)
+    }
+
     return render_template(
-        "links.html",
-        links=version_urls,
+        "releases.html",
+        releases=sorted_releases,
         h2=project_name,
         h2_link=f"/project/{project_name}",
         h2_paren="View this project on PyPI",
