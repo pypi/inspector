@@ -13,7 +13,7 @@ from .analysis.checks import basic_details
 from .deob import decompile, disassemble
 from .distribution import _get_dist
 from .legacy import parse
-from .utilities import mailto_report_link
+from .utilities import pypi_report_form
 
 
 def traces_sampler(sampling_context):
@@ -205,7 +205,7 @@ def file(project_name, version, first, second, rest, distname, filepath):
         except FileNotFoundError:
             return abort(404)
         file_extension = filepath.split(".")[-1]
-        report_link = mailto_report_link(project_name, version, filepath, request.url)
+        report_link = pypi_report_form(project_name, version, filepath, request.url)
 
         details = [detail.html() for detail in basic_details(dist, filepath)]
         common_params = {
