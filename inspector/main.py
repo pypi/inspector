@@ -13,7 +13,7 @@ from .analysis.checks import basic_details
 from .deob import decompile, disassemble
 from .distribution import _get_dist
 from .legacy import parse
-from .utilities import mailto_report_link, pypi_report_form
+from .utilities import pypi_report_form
 
 
 def traces_sampler(sampling_context):
