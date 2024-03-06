@@ -56,9 +56,13 @@ def index():
 
 @app.route("/project/<project_name>/")
 def versions(project_name):
-    if project_name != canonicalize_name(project_name):
+    if (
+        project_name != canonicalize_name(project_name)
+        or project_name != project_name.strip()
+    ):
         return redirect(
-            url_for("versions", project_name=canonicalize_name(project_name)), 301
+            url_for("versions", project_name=canonicalize_name(project_name.strip())),
+            301,
         )
 
     resp = requests.get(f"https://pypi.org/pypi/{project_name}/json")
