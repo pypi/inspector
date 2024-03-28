@@ -64,6 +64,9 @@ def versions(project_name):
     resp = requests.get(f"https://pypi.org/pypi/{project_name}/json")
     pypi_project_url = f"https://pypi.org/project/{project_name}"
 
+    # Self-host 404 page to mitigate iframe embeds
+    if resp.status_code == 404:
+        return render_template("404.html")
     if resp.status_code != 200:
         return redirect(pypi_project_url, 307)
 
