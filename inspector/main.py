@@ -50,6 +50,7 @@ def handle_bad_request(e):
 @app.route("/")
 def index():
     if project := request.args.get("project"):
+        project = project.strip()
         return redirect(f"/project/{project}")
     return render_template("index.html")
 
