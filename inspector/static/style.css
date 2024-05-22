@@ -11,7 +11,7 @@
 }
 
 .report-anchor {
-    display: block;
+    display: inline;
     color: red;
 }
 
