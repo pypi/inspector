@@ -11,6 +11,16 @@
 }
 
 .report-anchor {
-    display: block;
+    display: inline;
     color: red;
+}
+
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+    padding: 4px;
+}
+
+.no-entries {
+    color: grey;
 }

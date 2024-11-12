@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block head %}
+  <link rel="stylesheet" type="text/css" href="/static/style.css">
+{% endblock %}
+
+{% block body %}
+{% if releases|length != 1 %}
+  <p>Retrieved {{ releases|length }} versions.</p>
+{% else %}
+  <p>Retrieved 1 version.</p>
+{% endif %}
+
+<table>
+<colgroup>
+  <col style="width: 160px">
+  <col style="width: 160px">
+  <col style="width: 160px">
+</colgroup>
+<thead>
+<tr>
+  <th>Version</th>
+  <th>Upload Timestamp</th>
+  <th>Artifacts</th>
+</tr>
+</thead>
+{% for key, value in releases.items() %}
+  <tr>
+  {% if value|length > 0 %}
+    <td><a href="./{{ key }}">{{ key }}</a></td>
+    <td>{{ value[0]['upload_time'] }}</td>
+    <td>{{ value|length }}</td>
+  {% else %}
+    <td>{{ key }}</td>
+    <td><span class="no-entries"><i>Not Available</i></span></td>
+    <td><span class="no-entries"><i>Not Available</i></span></td>
+  {% endif %}
+  </tr>
+{% endfor %}
+<tbody>
+</tbody>
+
+</table>
+
+{% endblock %}

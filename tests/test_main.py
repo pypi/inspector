@@ -20,8 +20,8 @@ def test_versions(monkeypatch):
     assert get.calls == [pretend.call("https://pypi.org/pypi/foo/json")]
     assert render_template.calls == [
         pretend.call(
-            "links.html",
-            links=["./0.5.1e"],
+            "releases.html",
+            releases={"0.5.1e": None},
             h2="foo",
             h2_link="/project/foo",
             h2_paren="View this project on PyPI",
