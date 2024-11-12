@@ -10,5 +10,5 @@ export LANG="${ENCODING:-en_US.UTF-8}"
 # Print all the following commands
 set -x
 
-python -m isort inspector/
-python -m black inspector/
+python -m isort inspector/ tests/
+python -m black inspector/ tests/
