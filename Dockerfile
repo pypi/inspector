@@ -5,6 +5,9 @@ FROM python:3.11.8-slim-bullseye
 # Allow statements and log messages to immediately appear in the logs
 ENV PYTHONUNBUFFERED True
 
+# Don't create .pyc files
+ENV PYTHONDONTWRITEBYTECODE True
+
 # Put our application on the PYTHONPATH
 ENV PYTHONPATH /app
 
