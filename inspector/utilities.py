@@ -1,5 +1,7 @@
 import urllib.parse
 
+import requests
+
 
 def mailto_report_link(project_name, version, file_path, request_url):
     """
@@ -39,3 +41,22 @@ def pypi_report_form(project_name, version, file_path, request_url):
         f"?inspector_link={request_url}"
         f"&summary={urllib.parse.quote(summary)}"
     )
+
+
+def requests_session(custom_user_agent: str = "inspector.pypi.io") -> requests.Session:
+    """
+    Custom `requests` session with default headers applied.
+
+    Usage:
+
+    >>> from inspector.utilities import requests_session
+    >>> response = requests_session().get(<url>)
+    """
+    session = requests.Session()
+    session.headers.update(
+        {
+            "User-Agent": custom_user_agent,
+        }
+    )
+
+    return session

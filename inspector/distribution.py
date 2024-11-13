@@ -7,6 +7,8 @@ import requests
 
 from flask import abort
 
+from .utilities import requests_session
+
 # Lightweight datastore ;)
 dists = {}
 
@@ -59,7 +61,7 @@ def _get_dist(first, second, rest, distname):
 
     url = f"https://files.pythonhosted.org/packages/{first}/{second}/{rest}/{distname}"
     try:
-        resp = requests.get(url, stream=True)
+        resp = requests_session().get(url, stream=True)
         resp.raise_for_status()
     except requests.HTTPError as exc:
         abort(exc.response.status_code)
