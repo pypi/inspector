@@ -1,4 +1,0 @@
-black
-isort
-pretend
-pytest
