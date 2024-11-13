@@ -24,3 +24,21 @@ table, th, td {
 .no-entries {
     color: grey;
 }
+
+html, body {
+    margin: 0;
+    padding: 4px;
+    height: 115%;
+    /*overflow: hidden; !* Prevent scrollbars *!*/
+}
+
+#editor {
+    width: 100%;
+    height: 85vh;
+}
+
+
+#editor-container {
+    margin: 25px;
+    border: 1px solid lightgray;
+}
