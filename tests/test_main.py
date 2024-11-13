@@ -10,7 +10,9 @@ def test_versions(monkeypatch):
         json=lambda: stub_json,
     )
     get = pretend.call_recorder(lambda a: stub_response)
-    monkeypatch.setattr(inspector.main.requests, "get", get)
+    monkeypatch.setattr(
+        inspector.main, "requests_session", lambda: pretend.stub(get=get)
+    )
 
     render_template = pretend.call_recorder(lambda *a, **kw: None)
     monkeypatch.setattr(inspector.main, "render_template", render_template)

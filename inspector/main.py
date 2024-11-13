@@ -2,7 +2,6 @@ import os
 import urllib.parse
 
 import gunicorn.http.errors
-import requests
 import sentry_sdk
 
 from flask import Flask, Response, abort, redirect, render_template, request, url_for
@@ -13,7 +12,7 @@ from .analysis.checks import basic_details
 from .deob import decompile, disassemble
 from .distribution import _get_dist
 from .legacy import parse
-from .utilities import pypi_report_form
+from .utilities import pypi_report_form, requests_session
 
 
 def traces_sampler(sampling_context):
@@ -62,7 +61,7 @@ def versions(project_name):
             url_for("versions", project_name=canonicalize_name(project_name)), 301
         )
 
-    resp = requests.get(f"https://pypi.org/pypi/{project_name}/json")
+    resp = requests_session().get(f"https://pypi.org/pypi/{project_name}/json")
     pypi_project_url = f"https://pypi.org/project/{project_name}"
 
     # Self-host 404 page to mitigate iframe embeds
@@ -99,7 +98,9 @@ def distributions(project_name, version):
             301,
         )
 
-    resp = requests.get(f"https://pypi.org/pypi/{project_name}/{version}/json")
+    resp = requests_session().get(
+        f"https://pypi.org/pypi/{project_name}/{version}/json"
+    )
     if resp.status_code != 200:
         return redirect(f"/project/{project_name}/")
 
@@ -142,12 +143,14 @@ def distribution(project_name, version, first, second, rest, distname):
     dist = _get_dist(first, second, rest, distname)
 
     h2_paren = "View this project on PyPI"
-    resp = requests.get(f"https://pypi.org/pypi/{project_name}/json")
+    resp = requests_session().get(f"https://pypi.org/pypi/{project_name}/json")
     if resp.status_code == 404:
         h2_paren = "❌ Project no longer on PyPI"
 
     h3_paren = "View this release on PyPI"
-    resp = requests.get(f"https://pypi.org/pypi/{project_name}/{version}/json")
+    resp = requests_session().get(
+        f"https://pypi.org/pypi/{project_name}/{version}/json"
+    )
     if resp.status_code == 404:
         h3_paren = "❌ Release no longer on PyPI"
 
@@ -193,12 +196,14 @@ def file(project_name, version, first, second, rest, distname, filepath):
         )
 
     h2_paren = "View this project on PyPI"
-    resp = requests.get(f"https://pypi.org/pypi/{project_name}/json")
+    resp = requests_session().get(f"https://pypi.org/pypi/{project_name}/json")
     if resp.status_code == 404:
         h2_paren = "❌ Project no longer on PyPI"
 
     h3_paren = "View this release on PyPI"
-    resp = requests.get(f"https://pypi.org/pypi/{project_name}/{version}/json")
+    resp = requests_session().get(
+        f"https://pypi.org/pypi/{project_name}/{version}/json"
+    )
     if resp.status_code == 404:
         h3_paren = "❌ Release no longer on PyPI"
 
