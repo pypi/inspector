@@ -5,6 +5,9 @@ FROM python:3.11.8-slim-bullseye
 # Allow statements and log messages to immediately appear in the logs
 ENV PYTHONUNBUFFERED True
 
+# Don't create .pyc files
+ENV PYTHONDONTWRITEBYTECODE True
+
 # Put our application on the PYTHONPATH
 ENV PYTHONPATH /app
 
@@ -12,9 +15,6 @@ ENV PYTHONPATH /app
 # generally be used to control whether or not we install our development and
 # test dependencies.
 ARG DEVEL=no
-
-# Copy local code to the container image.
-WORKDIR /app
 
 # Install System level requirements, this is done before everything else
 # because these are rarely ever going to change.
@@ -27,15 +27,17 @@ RUN set -x \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install pycdc and pycdas...
-RUN git clone "https://github.com/zrax/pycdc.git"
+WORKDIR /tmp
+RUN git clone "https://github.com/zrax/pycdc.git" && \
+    cd pycdc && \
+    cmake . && \
+    cmake --build . --config release && \
+    mv ./pycdc /usr/local/bin && \
+    mv ./pycdas /usr/local/bin && \
+    cd .. && rm -rf ./pycdc
 
-WORKDIR ./pycdc
-RUN cmake .
-RUN cmake --build . --config release
-RUN mv ./pycdc /usr/local/bin
-RUN mv ./pycdas /usr/local/bin
-RUN rm -rf ./pycdc
-
+# Copy local code to the container image.
+WORKDIR /app
 # Copy in requirements files
 COPY ./requirements ./requirements
 
