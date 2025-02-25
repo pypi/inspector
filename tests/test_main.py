@@ -4,7 +4,11 @@ import inspector.main
 
 
 def test_versions(monkeypatch):
-    stub_json = {"releases": {"0.5.1e": None}}
+    stub_json = [
+        {"number": "1.0", "platform": "ruby"},
+        {"number": "1.0", "platform": "java"},
+        {"number": "2.0", "platform": "ruby"},
+    ]
     stub_response = pretend.stub(
         status_code=200,
         json=lambda: stub_json,
@@ -19,14 +23,20 @@ def test_versions(monkeypatch):
 
     inspector.main.versions("foo")
 
-    assert get.calls == [pretend.call("https://pypi.org/pypi/foo/json")]
+    assert get.calls == [pretend.call("https://rubygems.org/api/v1/versions/foo.json")]
     assert render_template.calls == [
         pretend.call(
             "releases.html",
-            releases={"0.5.1e": None},
+            releases={
+                "1.0": [
+                    {"number": "1.0", "platform": "ruby"},
+                    {"number": "1.0", "platform": "java"},
+                ],
+                "2.0": [{"number": "2.0", "platform": "ruby"}],
+            },
             h2="foo",
-            h2_link="/project/foo",
-            h2_paren="View this project on PyPI",
-            h2_paren_link="https://pypi.org/project/foo",
+            h2_link="/gems/foo",
+            h2_paren="View this project on RubyGems.org",
+            h2_paren_link="https://rubygems.org/gems/foo",
         )
     ]

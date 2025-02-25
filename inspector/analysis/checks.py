@@ -3,7 +3,7 @@ from typing import Any, Generator
 
 from inspector.analysis.codedetails import Detail, DetailSeverity
 from inspector.analysis.entropy import shannon_entropy
-from inspector.distribution import TarGzDistribution, ZipDistribution
+from inspector.distribution import GemDistribution
 
 
 def __is_compiled(filepath: str) -> bool:
@@ -11,7 +11,7 @@ def __is_compiled(filepath: str) -> bool:
 
 
 def basic_details(
-    distribution: TarGzDistribution | ZipDistribution, filepath: str
+    distribution: GemDistribution, filepath: str
 ) -> Generator[Detail, Any, None]:
     contents = distribution.contents(filepath)
 

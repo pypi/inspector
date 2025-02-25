@@ -9,9 +9,9 @@
       <h1><a href="/">Inspector</a></h1>
       <form action="/">
         {% if h2 %}
-          <input type="text" name="project" placeholder="Project name" value="{{ h2 }}" autocomplete="off">
+          <input type="text" name="gem" placeholder="Gem name" value="{{ h2 }}" autocomplete="off">
         {% else %}
-          <input type="text" name="project" placeholder="Project name" autocomplete="off">
+          <input type="text" name="gem" placeholder="Gem name" autocomplete="off">
         {% endif %}
         <input type="submit">
       </form>
@@ -62,7 +62,7 @@
       {% block body %}{% endblock %}
     </main>
     <footer>
-      <small>Source: <a href="https://github.com/pypi/inspector">https://github.com/pypi/inspector</a></small>
+      <small>Source: <a href="https://github.com/rubygems/inspector">https://github.com/rubygems/inspector</a></small>
     </footer>
   </body>
 </html>

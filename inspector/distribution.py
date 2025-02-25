@@ -1,5 +1,4 @@
 import tarfile
-import zipfile
 
 from io import BytesIO
 
@@ -21,30 +20,43 @@ class Distribution:
         raise NotImplementedError
 
 
-class ZipDistribution(Distribution):
+class GemDistribution(Distribution):
     def __init__(self, f):
         f.seek(0)
-        self.zipfile = zipfile.ZipFile(f)
+        self.tarfile = tarfile.open(fileobj=f, mode="r")
+
+    def unpack_name(self, entry):
+        if entry.name.endswith(".tar.gz"):
+            return [
+                "/".join([entry.name, i.name])
+                for i in tarfile.open(
+                    fileobj=self.tarfile.extractfile(entry), mode="r"
+                ).getmembers()
+            ]
+        return [entry.name]
 
     def namelist(self):
-        return [i.filename for i in self.zipfile.infolist() if not i.is_dir()]
+        list = []
+        for i in self.tarfile.getmembers():
+            list.extend(self.unpack_name(i))
+        return list
 
-    def contents(self, filepath) -> bytes:
+    def _read_data(self, filepath):
         try:
-            return self.zipfile.read(filepath)
-        except KeyError:
+            file = tarfile.open(
+                fileobj=self.tarfile.extractfile("data.tar.gz"), mode="r"
+            ).extractfile(filepath)
+            if file:
+                return file.read()
+            else:
+                raise FileNotFoundError
+        except (KeyError, EOFError):
             raise FileNotFoundError
 
-
-class TarGzDistribution(Distribution):
-    def __init__(self, f):
-        f.seek(0)
-        self.tarfile = tarfile.open(fileobj=f, mode="r:gz")
-
-    def namelist(self):
-        return [i.name for i in self.tarfile.getmembers() if not i.isdir()]
-
     def contents(self, filepath):
+        if filepath.startswith("data.tar.gz"):
+            return self._read_data(filepath.removeprefix("data.tar.gz/"))
+
         try:
             file_ = self.tarfile.extractfile(filepath)
             if file_:
@@ -55,11 +67,16 @@ class TarGzDistribution(Distribution):
             raise FileNotFoundError
 
 
-def _get_dist(first, second, rest, distname):
-    if distname in dists:
-        return dists[distname]
+def _get_dist(project_name, version, platform):
+    full_name = (
+        f"{project_name}-{version}.gem"
+        if platform == "ruby"
+        else f"{project_name}-{version}-{platform}.gem"
+    )
+    if full_name in dists:
+        return dists[full_name]
 
-    url = f"https://files.pythonhosted.org/packages/{first}/{second}/{rest}/{distname}"
+    url = f"https://index.rubygems.org/gems/{full_name}"
     try:
         resp = requests_session().get(url, stream=True)
         resp.raise_for_status()
@@ -68,20 +85,6 @@ def _get_dist(first, second, rest, distname):
 
     f = BytesIO(resp.content)
 
-    if (
-        distname.endswith(".whl")
-        or distname.endswith(".zip")
-        or distname.endswith(".egg")
-    ):
-        distfile = ZipDistribution(f)
-        dists[distname] = distfile
-        return distfile
-
-    elif distname.endswith(".tar.gz"):
-        distfile = TarGzDistribution(f)
-        dists[distname] = distfile
-        return distfile
-
-    else:
-        # Not supported
-        return None
+    distfile = GemDistribution(f)
+    dists[full_name] = distfile
+    return distfile
