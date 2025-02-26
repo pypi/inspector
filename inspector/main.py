@@ -11,7 +11,6 @@ from packaging.utils import canonicalize_name
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 from .analysis.checks import basic_details
-from .deob import decompile, disassemble
 from .distribution import _get_dist
 from .utilities import mailto_report_link, requests_session
 
@@ -233,16 +232,6 @@ def file(project_name, version, platform, filepath):
             "h5": filepath,
             "h5_link": f"/gems/{project_name}/{version}/{platform}/{filepath}",  # noqa
         }
-
-        if file_extension in ["pyc", "pyo"]:
-            disassembly = disassemble(contents)
-            decompilation = decompile(contents)
-            return render_template(
-                "disasm.html",
-                disassembly=disassembly,
-                decompilation=decompilation,
-                **common_params,
-            )
 
         if isinstance(contents, bytes):
             if filepath.endswith(".gz"):

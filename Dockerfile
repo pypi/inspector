@@ -21,20 +21,10 @@ ARG DEVEL=no
 RUN set -x \
     && apt-get update \
     && apt-get install -y \
-        git cmake g++ \
-#        $(if [ "$DEVEL" = "yes" ]; then echo 'bash postgresql-client'; fi) \
+    git cmake g++ \
+    #        $(if [ "$DEVEL" = "yes" ]; then echo 'bash postgresql-client'; fi) \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# Install pycdc and pycdas...
-WORKDIR /tmp
-RUN git clone "https://github.com/zrax/pycdc.git" && \
-    cd pycdc && \
-    cmake . && \
-    cmake --build . --config release && \
-    mv ./pycdc /usr/local/bin && \
-    mv ./pycdas /usr/local/bin && \
-    cd .. && rm -rf ./pycdc
 
 # Copy local code to the container image.
 WORKDIR /app
@@ -43,8 +33,8 @@ COPY ./requirements ./requirements
 
 # Install production dependencies.
 RUN pip install \
-  -r requirements/main.txt \
-  -r requirements/deploy.txt
+    -r requirements/main.txt \
+    -r requirements/deploy.txt
 
 # Install development dependencies
 RUN if [ "$DEVEL" = "yes" ]; then pip install -r requirements/lint.txt; fi
