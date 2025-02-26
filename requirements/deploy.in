@@ -1,3 +1,4 @@
 #!/usr/bin/env -S pip-compile --allow-unsafe --generate-hashes --output-file=requirements/deploy.txt
 
 gunicorn
+ddtrace
