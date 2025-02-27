@@ -1,0 +1,153 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  annotations:
+    shipit.shopify.io/restart: 'true'
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  selector:
+    matchLabels:
+      name: web
+  template:
+    metadata:
+      annotations:
+        ad.datadoghq.com/gunicorn.logs: '[{"source":"rails","service":"inspector.rubygems.info","version": <%= current_sha.dump %>}]'
+      labels:
+        name: web
+        tags.datadoghq.com/env: "<%= environment %>"
+        tags.datadoghq.com/service: inspector.rubygems.info
+        tags.datadoghq.com/version: <%= current_sha %>
+    spec:
+      containers:
+      - name: gunicorn
+        image: 048268392960.dkr.ecr.us-west-2.amazonaws.com/rubygems/inspector:<%= current_sha %>
+        args: ["ddtrace-run", "gunicorn", "-c", "gunicorn.conf", "inspector.main:app"]
+        ports:
+        - containerPort: 3000
+          name: http-gunicorn
+        readinessProbe:
+          httpGet:
+            path: /_health/
+            port: 3000
+            httpHeaders:
+            - name: X-Forwarded-Proto
+              value: https
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 200m
+            memory: 1Gi
+          limits:
+            cpu: 1500m
+            memory: 3Gi
+        env:
+          - name: ENV
+            value: "<%= environment %>"
+          - name: DD_AGENT_HOST
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.hostIP
+          - name: STATSD_IMPLEMENTATION
+            value: "datadog"
+          - name: STATSD_HOST
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.hostIP
+          - name: STATSD_ADDR
+            value: $(STATSD_HOST):8125
+          - name: AWS_REGION
+            value: "us-west-2"
+          - name: HONEYBADGER_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: <%= environment %>
+                key: honeybadger_api_key
+          - name: DATADOG_CSP_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: <%= environment %>
+                key: datadog_csp_api_key
+        securityContext:
+          privileged: false
+        lifecycle:
+          preStop:
+            exec:
+              command: ["sleep", "25"]
+      - name: nginx
+        image: nginx:1.25.2
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: http-nginx
+          protocol: TCP
+        resources:
+          <% if environment == 'production' %>
+          requests:
+            cpu: 100m
+            memory: 20Mi
+          limits:
+            cpu: 300m
+            memory: 200Mi
+          <% else %>
+          requests:
+            cpu: 20m
+            memory: 10Mi
+          limits:
+            cpu: 60m
+            memory: 100Mi
+          <% end %>
+        volumeMounts:
+          - name: nginxconfig
+            mountPath: /etc/nginx
+            readOnly: true
+          - name: nginxlog
+            mountPath: /var/log/nginx
+          - name: nginxcache
+            mountPath: /var/lib/nginx/cache
+        livenessProbe:
+          httpGet:
+            path: /nginx_health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /nginx_health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        lifecycle:
+          # https://blog.gruntwork.io/delaying-shutdown-to-wait-for-pod-deletion-propagation-445f779a8304
+          preStop:
+            exec:
+              command: [
+                "sh", "-c",
+                # Introduce a delay to the shutdown sequence to wait for the
+                # pod eviction event to propagate. Then, gracefully shutdown
+                # nginx.
+                "sleep 20 && /usr/sbin/nginx -s quit",
+              ]
+      volumes:
+        - name: nginxconfig
+          configMap:
+            name: nginx-configmap
+            items:
+              - key: default
+                path: nginx.conf
+              - key: logging
+                path: conf.d/logging.conf
+              - key: rubygems
+                path: sites-enabled/<%= environment %>.ruybgems.conf
+        - name: nginxlog
+          emptyDir: {}
+        - name: nginxcache
+          emptyDir: {}

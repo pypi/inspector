@@ -1,0 +1,37 @@
+machine:
+  environment:
+    KUBECONFIG: /home/deploy/.kube/config
+
+dependencies:
+  override:
+    - "true"
+
+deploy:
+  override:
+    - krane render -f config/deploy/$ENVIRONMENT --bindings=environment=$ENVIRONMENT --current-sha=$REVISION | krane deploy inspector-$ENVIRONMENT rubygems --stdin -f config/deploy/$ENVIRONMENT/secrets.ejson
+
+rollback:
+  override:
+    - krane render -f config/deploy/$ENVIRONMENT --bindings=environment=$ENVIRONMENT --current-sha=$REVISION | krane deploy inspector-$ENVIRONMENT rubygems  --stdin -f config/deploy/$ENVIRONMENT/secrets.ejson
+
+tasks:
+  restart:
+    action: Restart application
+    description: Trigger the restart of gunicorn
+    steps:
+      - krane restart inspector-$ENVIRONMENT rubygems
+  autoscale_web:
+    action: Autoscale web deployment
+    description: "Autoscale the web deployment to %{MIN}-%{MAX} replicas"
+    steps:
+      - kubectl autoscale -n inspector-$ENVIRONMENT --context rubygems deployment/web --min="$MIN" --max="$MAX" --cpu-percentage="$CPU_PERCENTAGE"
+    variables:
+      - name: MIN
+        title: The minimum number of web replicas
+        default: 1
+      - name: MAX
+        title: The maximum number of web replicas
+        default: 3
+      - name: CPU_PERCENTAGE
+        title: The threshold of CPU utilization used for autoscaling
+        default: 75
