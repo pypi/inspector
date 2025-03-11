@@ -11,6 +11,7 @@ from sentry_sdk.integrations.flask import FlaskIntegration
 from .analysis.checks import basic_details
 from .deob import decompile, disassemble
 from .distribution import _get_dist
+from .errors import InspectorError
 from .legacy import parse
 from .utilities import pypi_report_form, requests_session
 
@@ -140,7 +141,10 @@ def distribution(project_name, version, first, second, rest, distname):
             301,
         )
 
-    dist = _get_dist(first, second, rest, distname)
+    try:
+        dist = _get_dist(first, second, rest, distname)
+    except InspectorError:
+        return abort(400)
 
     h2_paren = "View this project on PyPI"
     resp = requests_session().get(f"https://pypi.org/pypi/{project_name}/json")
@@ -213,6 +217,8 @@ def file(project_name, version, first, second, rest, distname, filepath):
             contents = dist.contents(filepath)
         except FileNotFoundError:
             return abort(404)
+        except InspectorError:
+            return abort(400)
         file_extension = filepath.split(".")[-1]
         report_link = pypi_report_form(project_name, version, filepath, request.url)
 
