@@ -1,5 +1,6 @@
 import tarfile
 import zipfile
+import zlib
 
 from io import BytesIO
 
@@ -7,6 +8,7 @@ import requests
 
 from flask import abort
 
+from .errors import BadFileError
 from .utilities import requests_session
 
 # Lightweight datastore ;)
@@ -24,7 +26,10 @@ class Distribution:
 class ZipDistribution(Distribution):
     def __init__(self, f):
         f.seek(0)
-        self.zipfile = zipfile.ZipFile(f)
+        try:
+            self.zipfile = zipfile.ZipFile(f)
+        except zipfile.BadZipFile:
+            raise BadFileError("Bad zipfile")
 
     def namelist(self):
         return [i.filename for i in self.zipfile.infolist() if not i.is_dir()]
@@ -53,6 +58,8 @@ class TarGzDistribution(Distribution):
                 raise FileNotFoundError
         except (KeyError, EOFError):
             raise FileNotFoundError
+        except (tarfile.TarError, zlib.error):
+            raise BadFileError("Bad tarfile")
 
 
 def _get_dist(first, second, rest, distname):
