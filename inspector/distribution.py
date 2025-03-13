@@ -44,7 +44,10 @@ class ZipDistribution(Distribution):
 class TarGzDistribution(Distribution):
     def __init__(self, f):
         f.seek(0)
-        self.tarfile = tarfile.open(fileobj=f, mode="r:gz")
+        try:
+            self.tarfile = tarfile.open(fileobj=f, mode="r:gz")
+        except tarfile.BadGzipFile:
+            raise BadFileError("Bad gzip file")
 
     def namelist(self):
         return [i.name for i in self.tarfile.getmembers() if not i.isdir()]
