@@ -1,3 +1,4 @@
+import gzip
 import tarfile
 import zipfile
 import zlib
@@ -46,7 +47,7 @@ class TarGzDistribution(Distribution):
         f.seek(0)
         try:
             self.tarfile = tarfile.open(fileobj=f, mode="r:gz")
-        except tarfile.BadGzipFile:
+        except gzip.BadGzipFile:
             raise BadFileError("Bad gzip file")
 
     def namelist(self):
