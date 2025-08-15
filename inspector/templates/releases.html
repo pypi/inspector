@@ -1,45 +1,74 @@
 {% extends 'base.html' %}
 
-{% block head %}
-  <link rel="stylesheet" type="text/css" href="/static/style.css">
-{% endblock %}
-
 {% block body %}
-{% if releases|length != 1 %}
-  <p>Retrieved {{ releases|length }} versions.</p>
-{% else %}
-  <p>Retrieved 1 version.</p>
-{% endif %}
+<div class="space-y-6">
+  <!-- Summary Card -->
+  <div class="bg-gradient-to-r from-python-blue to-python-blue-dark text-white rounded-lg p-6 shadow-lg">
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-2xl font-bold mb-2">Package Releases</h2>
+        {% if releases|length != 1 %}
+          <p class="text-lg opacity-90">Retrieved {{ releases|length }} versions</p>
+        {% else %}
+          <p class="text-lg opacity-90">Retrieved 1 version</p>
+        {% endif %}
+      </div>
+      <svg class="w-16 h-16 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+      </svg>
+    </div>
+  </div>
 
-<table>
-<colgroup>
-  <col style="width: 160px">
-  <col style="width: 160px">
-  <col style="width: 160px">
-</colgroup>
-<thead>
-<tr>
-  <th>Version</th>
-  <th>Upload Timestamp</th>
-  <th>Artifacts</th>
-</tr>
-</thead>
-{% for key, value in releases.items() %}
-  <tr>
-  {% if value|length > 0 %}
-    <td><a href="./{{ key }}">{{ key }}</a></td>
-    <td>{{ value[0]['upload_time'] }}</td>
-    <td>{{ value|length }}</td>
-  {% else %}
-    <td>{{ key }}</td>
-    <td><span class="no-entries"><i>Not Available</i></span></td>
-    <td><span class="no-entries"><i>Not Available</i></span></td>
-  {% endif %}
-  </tr>
-{% endfor %}
-<tbody>
-</tbody>
-
-</table>
-
+  <!-- Releases Table -->
+  <div class="overflow-hidden shadow-lg rounded-lg border border-gray-200">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-python-blue text-white">
+        <tr>
+          <th scope="col" class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+            Version
+          </th>
+          <th scope="col" class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+            Upload Timestamp
+          </th>
+          <th scope="col" class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+            Artifacts
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        {% for key, value in releases.items() %}
+        <tr class="hover:bg-gray-50 transition-colors duration-150">
+          {% if value|length > 0 %}
+            <td class="px-6 py-4 whitespace-nowrap">
+              <a href="./{{ key }}" class="text-python-blue hover:text-python-blue-dark font-semibold transition-colors duration-200">
+                {{ key }}
+              </a>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              {{ value[0]['upload_time'] }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                {{ value|length }} artifact{% if value|length != 1 %}s{% endif %}
+              </span>
+            </td>
+          {% else %}
+            <td class="px-6 py-4 whitespace-nowrap text-gray-500">
+              {{ key }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="text-gray-400 italic text-sm">Not Available</span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+                N/A
+              </span>
+            </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}

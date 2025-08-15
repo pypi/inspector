@@ -2,25 +2,55 @@
 
 {% block head %}
 <link rel="stylesheet" type="text/css" href="/static/prism.css">
-<link rel="stylesheet" type="text/css" href="/static/style.css">
+<style>
+  pre[class*="language-"] {
+    background: #f8f9fa;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+  }
+  .line-numbers .line-numbers-rows {
+    border-right: 1px solid #ddd;
+  }
+</style>
 {% endblock %}
 
 {% block above_body %}
-    <fieldset class="analysis-summary">
-        <legend><strong>Summary</strong></legend>
-        <ul>
+    <div class="bg-gradient-to-r from-python-yellow to-python-yellow-dark rounded-lg p-6 mb-6 shadow-lg">
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Analysis Summary</h3>
+        <ul class="space-y-2">
             {% for detail in file_details %}
-                <li>{{ detail|safe }}</li>
+                <li class="flex items-start">
+                    <svg class="w-5 h-5 text-gray-700 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="text-gray-800">{{ detail|safe }}</span>
+                </li>
             {% endfor %}
         </ul>
-    </fieldset>
+    </div>
 {% endblock %}
 
 {% block body %}
-<a href="{{ mailto_report_link }}" class="report-anchor"> <strong>Report Malicious Package</strong> </a>
-<pre id="line" class="line-numbers linkable-line-numbers language-{{ name }}">
+<div class="space-y-4">
+    <div class="flex justify-end">
+        <a href="{{ mailto_report_link }}" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            Report Malicious Package
+        </a>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+        <div class="bg-python-blue text-white px-4 py-2">
+            <span class="font-mono text-sm">{{ name|upper }} Code</span>
+        </div>
+        <pre id="line" class="line-numbers linkable-line-numbers language-{{ name }} m-0">
 {# Indenting the below <code> tag will cause rendering issues! #}
 <code class="language-{{ name }}">{{- code }}</code>
-</pre>
+        </pre>
+    </div>
+</div>
 <script src="/static/prism.js"></script>
 {% endblock %}

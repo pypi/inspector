@@ -1,9 +1,25 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<ul>
-{% for link in links %}
-  <li><a href="{{ link }}">{{ link|unquote }}</a></li>
-{% endfor %}
-</ul>
+<div class="space-y-4">
+  <div class="bg-gradient-to-r from-python-blue to-python-blue-dark text-white rounded-lg p-6 shadow-lg">
+    <h2 class="text-2xl font-bold mb-2">Package Artifacts</h2>
+    <p class="opacity-90">Available files for download</p>
+  </div>
+  
+  <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+    <ul class="space-y-3">
+    {% for link in links %}
+      <li class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition-colors duration-150">
+        <svg class="w-5 h-5 text-python-blue mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+        </svg>
+        <a href="{{ link }}" class="text-python-blue hover:text-python-blue-dark font-mono text-sm transition-colors duration-200 break-all">
+          {{ link|unquote }}
+        </a>
+      </li>
+    {% endfor %}
+    </ul>
+  </div>
+</div>
 {% endblock %}
