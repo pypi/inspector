@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .btn-primary {
+    @apply bg-python-blue hover:bg-python-blue-dark text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg;
+  }
+  
+  .btn-secondary {
+    @apply bg-python-yellow hover:bg-python-yellow-dark text-gray-900 font-semibold py-2 px-4 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg;
+  }
+  
+  .input-primary {
+    @apply border-2 border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-python-blue focus:ring-2 focus:ring-python-blue/20 transition-all duration-200;
+  }
+  
+  .table-custom {
+    @apply min-w-full divide-y divide-gray-200 shadow-sm rounded-lg overflow-hidden;
+  }
+  
+  .table-custom thead {
+    @apply bg-python-blue text-white;
+  }
+  
+  .table-custom th {
+    @apply px-6 py-3 text-left text-xs font-medium uppercase tracking-wider;
+  }
+  
+  .table-custom tbody {
+    @apply bg-white divide-y divide-gray-200;
+  }
+  
+  .table-custom td {
+    @apply px-6 py-4 whitespace-nowrap text-sm;
+  }
+  
+  .table-custom tbody tr:hover {
+    @apply bg-gray-50 transition-colors duration-150;
+  }
+  
+  .card {
+    @apply bg-white rounded-lg shadow-md p-6 border border-gray-200;
+  }
+  
+  .link-primary {
+    @apply text-python-blue hover:text-python-blue-dark underline transition-colors duration-200;
+  }
+  
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .badge-success {
+    @apply bg-green-100 text-green-800;
+  }
+  
+  .badge-warning {
+    @apply bg-python-yellow-light text-gray-900;
+  }
+  
+  .badge-error {
+    @apply bg-red-100 text-red-800;
+  }
+  
+  .header-gradient {
+    @apply bg-gradient-to-r from-python-blue via-python-blue-dark to-python-blue;
+  }
+}
