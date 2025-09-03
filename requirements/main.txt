@@ -101,9 +101,9 @@ requests==2.32.3 \
     --hash=sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760 \
     --hash=sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6
     # via -r requirements/main.in
-sentry-sdk[flask]==2.20.0 \
-    --hash=sha256:afa82713a92facf847df3c6f63cec71eb488d826a50965def3d7722aa6f0fdab \
-    --hash=sha256:c359a1edf950eb5e80cffd7d9111f3dbeef57994cb4415df37d39fda2cf22364
+sentry-sdk[flask]==2.35.2 \
+    --hash=sha256:38c98e3cbb620dd3dd80a8d6e39c753d453dd41f8a9df581b0584c19a52bc926 \
+    --hash=sha256:e9e8f3c795044beb59f2c8f4c6b9b0f9779e5e604099882df05eec525e782cc6
     # via -r requirements/main.in
 urllib3==1.26.19 \
     --hash=sha256:37a0344459b199fce0e80b0d3569837ec6b6937435c5244e7fd73fa6006830f3 \
