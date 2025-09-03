@@ -3,6 +3,7 @@
 {% block head %}
 <link rel="stylesheet" type="text/css" href="/static/prism.css">
 <link rel="stylesheet" type="text/css" href="/static/style.css">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 {% endblock %}
 
 {% block above_body %}
@@ -18,9 +19,34 @@
 
 {% block body %}
 <a href="{{ mailto_report_link }}" class="report-anchor"> <strong>Report Malicious Package</strong> </a>
-<pre id="line" class="line-numbers linkable-line-numbers language-{{ name }}">
+{#<pre id="line" class="line-numbers linkable-line-numbers language-{{ name }}">#}
 {# Indenting the below <code> tag will cause rendering issues! #}
-<code class="language-{{ name }}">{{- code }}</code>
-</pre>
-<script src="/static/prism.js"></script>
+{#<code class="language-{{ name }}">{{- code }}</code>#}
+{#</pre>#}
+<div id="editor-container">
+<div id="editor"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.48.0/min/vs/loader.min.js"></script>
+<script>
+
+    let codeLiteral = {{code|tojson}};
+
+    // Configuration for loading Monaco Editor
+    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.48.0/min/vs/' }});
+
+    // Loading the editor
+    require(['vs/editor/editor.main'], function () {
+        window.editor = monaco.editor.create(document.getElementById('editor'), {
+            value: codeLiteral,
+            language: 'python',
+            automaticLayout: true,
+            readOnly: true,
+            scrollBeyondLastLine: false,
+            fontFamily: '"JetBrains Mono", monospace'
+        });
+
+    });
+
+</script>
 {% endblock %}
