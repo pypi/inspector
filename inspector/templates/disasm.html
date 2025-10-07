@@ -17,8 +17,11 @@
 {% endblock %}
 
 {% block body %}
-    <a href="{{ mailto_report_link }}" style="color:red"> <strong>Report Malicious Package</strong> </a>
-    <br>
+    <div style="margin-bottom: 15px;">
+        <a href="{{ mailto_report_link }}" style="color:red"> <strong>Report Malicious Package</strong> </a>
+        <span style="margin: 0 10px;">|</span>
+        <a href="{{ download_url }}" class="download-anchor" download> <strong>⬇️ Download File</strong> </a>
+    </div>
     <br>
     <div>
 

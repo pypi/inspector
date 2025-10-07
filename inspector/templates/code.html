@@ -17,7 +17,11 @@
 {% endblock %}
 
 {% block body %}
-<a href="{{ mailto_report_link }}" class="report-anchor"> <strong>Report Malicious Package</strong> </a>
+<div style="margin-bottom: 15px;">
+    <a href="{{ mailto_report_link }}" class="report-anchor"> <strong>Report Malicious Package</strong> </a>
+    <span style="margin: 0 10px;">|</span>
+    <a href="{{ download_url }}" class="download-anchor" download> <strong>⬇️ Download File</strong> </a>
+</div>
 <pre id="line" class="line-numbers linkable-line-numbers language-{{ name }}">
 {# Indenting the below <code> tag will cause rendering issues! #}
 <code class="language-{{ name }}">{{- code }}</code>

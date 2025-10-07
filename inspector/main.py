@@ -1,7 +1,12 @@
 import os
 import urllib.parse
 
-import gunicorn.http.errors
+try:
+    import gunicorn.http.errors
+    GUNICORN_AVAILABLE = True
+except ImportError:
+    GUNICORN_AVAILABLE = False
+
 import sentry_sdk
 
 from flask import Flask, Response, abort, redirect, render_template, request, url_for
@@ -42,9 +47,23 @@ app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
 
 
-@app.errorhandler(gunicorn.http.errors.ParseException)
-def handle_bad_request(e):
-    return abort(400)
+if GUNICORN_AVAILABLE:
+    @app.errorhandler(gunicorn.http.errors.ParseException)
+    def handle_bad_request(e):
+        return abort(400)
+
+
+def _get_file_from_dist(project_name, first, second, rest, distname, filepath):
+    if project_name != canonicalize_name(project_name):
+        return None, None, True
+    
+    dist = _get_dist(first, second, rest, distname)
+    
+    if not dist:
+        return None, abort(404), False
+    
+    contents = dist.contents(filepath)
+    return contents, dist, False
 
 
 @app.route("/")
@@ -162,9 +181,11 @@ def distribution(project_name, version, first, second, rest, distname):
         file_urls = [
             "./" + urllib.parse.quote(filename) for filename in dist.namelist()
         ]
+        download_url = f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/download"
         return render_template(
             "links.html",
             links=file_urls,
+            download_url=download_url,
             h2=f"{project_name}",
             h2_link=f"/project/{project_name}",
             h2_paren=h2_paren,
@@ -184,7 +205,16 @@ def distribution(project_name, version, first, second, rest, distname):
     "/project/<project_name>/<version>/packages/<first>/<second>/<rest>/<distname>/<path:filepath>"  # noqa
 )
 def file(project_name, version, first, second, rest, distname, filepath):
-    if project_name != canonicalize_name(project_name):
+    try:
+        contents, dist, should_redirect = _get_file_from_dist(
+            project_name, first, second, rest, distname, filepath
+        )
+    except FileNotFoundError:
+        return abort(404)
+    except InspectorError:
+        return abort(400)
+    
+    if should_redirect:
         return redirect(
             url_for(
                 "file",
@@ -198,6 +228,9 @@ def file(project_name, version, first, second, rest, distname, filepath):
             ),
             301,
         )
+    
+    if contents is None:
+        return dist
 
     h2_paren = "View this project on PyPI"
     resp = requests_session().get(f"https://pypi.org/pypi/{project_name}/json")
@@ -210,57 +243,49 @@ def file(project_name, version, first, second, rest, distname, filepath):
     )
     if resp.status_code == 404:
         h3_paren = "❌ Release no longer on PyPI"
+    
+    file_extension = filepath.split(".")[-1]
+    report_link = pypi_report_form(project_name, version, filepath, request.url)
+    download_url = f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/{filepath}/download"
 
-    dist = _get_dist(first, second, rest, distname)
-    if dist:
-        try:
-            contents = dist.contents(filepath)
-        except FileNotFoundError:
-            return abort(404)
-        except InspectorError:
-            return abort(400)
-        file_extension = filepath.split(".")[-1]
-        report_link = pypi_report_form(project_name, version, filepath, request.url)
+    details = [detail.html() for detail in basic_details(dist, filepath)]
+    common_params = {
+        "file_details": details,
+        "mailto_report_link": report_link,
+        "download_url": download_url,
+        "h2": f"{project_name}",
+        "h2_link": f"/project/{project_name}",
+        "h2_paren": h2_paren,
+        "h2_paren_link": f"https://pypi.org/project/{project_name}",
+        "h3": f"{project_name}=={version}",
+        "h3_link": f"/project/{project_name}/{version}",
+        "h3_paren": h3_paren,
+        "h3_paren_link": f"https://pypi.org/project/{project_name}/{version}",
+        "h4": distname,
+        "h4_link": f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/",  # noqa
+        "h5": filepath,
+        "h5_link": f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/{filepath}",  # noqa
+    }
 
-        details = [detail.html() for detail in basic_details(dist, filepath)]
-        common_params = {
-            "file_details": details,
-            "mailto_report_link": report_link,
-            "h2": f"{project_name}",
-            "h2_link": f"/project/{project_name}",
-            "h2_paren": h2_paren,
-            "h2_paren_link": f"https://pypi.org/project/{project_name}",
-            "h3": f"{project_name}=={version}",
-            "h3_link": f"/project/{project_name}/{version}",
-            "h3_paren": h3_paren,
-            "h3_paren_link": f"https://pypi.org/project/{project_name}/{version}",
-            "h4": distname,
-            "h4_link": f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/",  # noqa
-            "h5": filepath,
-            "h5_link": f"/project/{project_name}/{version}/packages/{first}/{second}/{rest}/{distname}/{filepath}",  # noqa
-        }
-
-        if file_extension in ["pyc", "pyo"]:
-            disassembly = disassemble(contents)
-            decompilation = decompile(contents)
-            return render_template(
-                "disasm.html",
-                disassembly=disassembly,
-                decompilation=decompilation,
-                **common_params,
-            )
-
-        if isinstance(contents, bytes):
-            try:
-                contents = contents.decode()
-            except UnicodeDecodeError:
-                return "Binary files are not supported."
-
+    if file_extension in ["pyc", "pyo"]:
+        disassembly = disassemble(contents)
+        decompilation = decompile(contents)
         return render_template(
-            "code.html", code=contents, name=file_extension, **common_params
-        )  # noqa
-    else:
-        return "Distribution type not supported"
+            "disasm.html",
+            disassembly=disassembly,
+            decompilation=decompilation,
+            **common_params,
+        )
+
+    if isinstance(contents, bytes):
+        try:
+            contents = contents.decode()
+        except UnicodeDecodeError:
+            return "Binary files are not supported."
+
+    return render_template(
+        "code.html", code=contents, name=file_extension, **common_params
+    )  # noqa
 
 
 @app.route("/_health/")
@@ -271,3 +296,77 @@ def health():
 @app.route("/robots.txt")
 def robots():
     return Response("User-agent: *\nDisallow: /", mimetype="text/plain")
+
+
+@app.route(
+    "/project/<project_name>/<version>/packages/<first>/<second>/<rest>/<distname>/download"
+)
+def download_distribution(project_name, version, first, second, rest, distname):
+    if project_name != canonicalize_name(project_name):
+        return redirect(
+            url_for(
+                "download_distribution",
+                project_name=canonicalize_name(project_name),
+                version=version,
+                first=first,
+                second=second,
+                rest=rest,
+                distname=distname,
+            ),
+            301,
+        )
+
+    try:
+        dist = _get_dist(first, second, rest, distname)
+    except InspectorError:
+        return abort(400)
+
+    if not dist:
+        return abort(404)
+
+    url = f"https://files.pythonhosted.org/packages/{first}/{second}/{rest}/{distname}"
+    return redirect(url, 307)
+
+
+@app.route(
+    "/project/<project_name>/<version>/packages/<first>/<second>/<rest>/<distname>/<path:filepath>/download"
+)
+def download_file(project_name, version, first, second, rest, distname, filepath):
+    try:
+        contents, dist, should_redirect = _get_file_from_dist(
+            project_name, first, second, rest, distname, filepath
+        )
+    except FileNotFoundError:
+        return abort(404)
+    except InspectorError:
+        return abort(400)
+    
+    if should_redirect:
+        return redirect(
+            url_for(
+                "download_file",
+                project_name=canonicalize_name(project_name),
+                version=version,
+                first=first,
+                second=second,
+                rest=rest,
+                distname=distname,
+                filepath=filepath,
+            ),
+            301,
+        )
+    
+    if contents is None:
+        return dist
+
+    filename = filepath.split("/")[-1]
+
+    return Response(
+        contents,
+        mimetype="application/octet-stream",
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}",
+            "Content-Length": str(len(contents)),
+        },
+    )
+

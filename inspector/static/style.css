@@ -15,6 +15,30 @@
     color: red;
 }
 
+.download-anchor {
+    display: inline;
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.download-anchor:hover {
+    text-decoration: underline;
+}
+
+.download-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #0066cc;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.download-button:hover {
+    background-color: #0052a3;
+}
+
 table, th, td {
     border: 1px solid black;
     border-collapse: collapse;

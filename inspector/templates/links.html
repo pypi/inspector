@@ -1,6 +1,13 @@
 {% extends 'base.html' %}
 
 {% block body %}
+{% if download_url %}
+<div style="margin-bottom: 20px;">
+  <a href="{{ download_url }}" class="download-button" download>
+    <strong>⬇️ Download Package</strong>
+  </a>
+</div>
+{% endif %}
 <ul>
 {% for link in links %}
   <li><a href="{{ link }}">{{ link|unquote }}</a></li>
