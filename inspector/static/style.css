@@ -24,3 +24,7 @@ table, th, td {
 .no-entries {
     color: grey;
 }
+
+pre[class*=language-]{
+    white-space: pre-wrap;
+}
