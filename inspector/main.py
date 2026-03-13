@@ -16,6 +16,132 @@ from .legacy import parse
 from .utilities import pypi_report_form, requests_session
 
 
+def _is_likely_text(decoded_str):
+    """Check if decoded string looks like valid text (not corrupted)."""
+    if not decoded_str:
+        return True
+
+    # Too many control characters suggests wrong encoding
+    control_chars = sum(1 for c in decoded_str if ord(c) < 32 and c not in "\t\n\r")
+    return control_chars / len(decoded_str) <= 0.3
+
+
+def _is_likely_misencoded_asian_text(decoded_str, encoding):
+    """
+    Detect when Western encodings decode Asian text as Latin Extended garbage.
+
+    When cp1252/latin-1 decode multi-byte Asian text, they produce strings
+    with many Latin Extended/Supplement characters and few/no spaces.
+    """
+    if encoding not in ("cp1252", "latin-1") or len(decoded_str) <= 3:
+        return False
+
+    # Count Latin Extended-A/B (Ā-ʯ) and Latin-1 Supplement (À-ÿ)
+    high_latin = sum(1 for c in decoded_str if 0x0080 <= ord(c) <= 0x024F)
+    spaces = decoded_str.count(" ")
+
+    # If >50% high Latin chars and <10% spaces, likely misencoded
+    return high_latin / len(decoded_str) > 0.5 and spaces < len(decoded_str) * 0.1
+
+
+def _is_likely_misencoded_cross_asian(decoded_str, encoding):
+    """
+    Detect when Asian encodings misinterpret other Asian encodings.
+
+    Patterns:
+    - shift_jis decoding GB2312 produces excessive half-width katakana
+    - Asian encodings decoding Western text produce ASCII+CJK mix (unlikely)
+    """
+    if len(decoded_str) <= 3:
+        return False
+
+    # Pattern 1: Excessive half-width katakana (shift_jis misinterpreting GB2312)
+    # Half-width katakana range: U+FF61-FF9F
+    if encoding == "shift_jis":
+        half_width_katakana = sum(1 for c in decoded_str if 0xFF61 <= ord(c) <= 0xFF9F)
+        # If >30% is half-width katakana, likely wrong encoding
+        # (Real Japanese text uses mostly full-width kana and kanji)
+        if half_width_katakana / len(decoded_str) > 0.3:
+            return True
+
+    # Pattern 2: ASCII mixed with CJK (Asian encoding misinterpreting Western)
+    # CJK Unified Ideographs: U+4E00-U+9FFF
+    if encoding in ("big5", "gbk", "gb2312", "shift_jis", "euc-kr"):
+        ascii_chars = sum(1 for c in decoded_str if ord(c) < 128)
+        cjk_chars = sum(1 for c in decoded_str if 0x4E00 <= ord(c) <= 0x9FFF)
+
+        # If we have ASCII letters and scattered CJK chars, likely misencoded
+        # Real CJK text is mostly CJK with occasional ASCII punctuation
+        if ascii_chars > 0 and cjk_chars > 0:
+            # Check if there are ASCII letters (not just punctuation)
+            ascii_letters = sum(1 for c in decoded_str if c.isalpha() and ord(c) < 128)
+            # If we have ASCII letters AND CJK, and CJK is <50%, likely wrong
+            if ascii_letters >= 2 and cjk_chars / len(decoded_str) < 0.5:
+                return True
+
+    return False
+
+
+def decode_with_fallback(content_bytes):
+    """
+    Decode bytes to string, trying multiple encodings.
+
+    Strategy:
+    1. Try UTF-8 (most common)
+    2. Try common encodings with sanity checks
+    3. Fall back to latin-1 (decodes anything, but may produce garbage)
+
+    Returns decoded string or None if all attempts fail (only if truly binary).
+    """
+    # Try UTF-8 first (most common)
+    try:
+        decoded = content_bytes.decode("utf-8")
+        # Apply same heuristics as other encodings
+        if _is_likely_text(decoded):
+            return decoded
+    except (UnicodeDecodeError, AttributeError):
+        pass
+
+    # Try encodings from most to least restrictive. Even with improved heuristics,
+    # putting GBK/GB2312 early breaks too many other encodings. The order below
+    # maximizes correct detections while minimizing misdetections.
+    common_encodings = [
+        "shift_jis",  # Japanese (restrictive multi-byte)
+        "euc-kr",  # Korean (restrictive multi-byte)
+        "big5",  # Chinese Traditional (restrictive multi-byte)
+        "gbk",  # Chinese Simplified
+        "gb2312",  # Chinese Simplified, older
+        "cp1251",  # Cyrillic
+        "iso-8859-2",  # Central/Eastern European
+        "cp1252",  # Windows Western European (very permissive)
+        "latin-1",  # ISO-8859-1 fallback (never fails)
+    ]
+
+    for encoding in common_encodings:
+        try:
+            decoded = content_bytes.decode(encoding)
+
+            # Skip if decoded text looks corrupted
+            if not _is_likely_text(decoded):
+                continue
+
+            # Skip if Western encoding produced Asian-text-as-garbage pattern
+            if _is_likely_misencoded_asian_text(decoded, encoding):
+                continue
+
+            # Skip if Asian encoding misinterpreted other Asian/Western text
+            if _is_likely_misencoded_cross_asian(decoded, encoding):
+                continue
+
+            return decoded
+
+        except (UnicodeDecodeError, LookupError):
+            continue
+
+    # If we get here, all encodings failed sanity checks (truly binary data)
+    return None
+
+
 def traces_sampler(sampling_context):
     """
     Filter out noisy transactions.
@@ -251,10 +377,10 @@ def file(project_name, version, first, second, rest, distname, filepath):
             )
 
         if isinstance(contents, bytes):
-            try:
-                contents = contents.decode()
-            except UnicodeDecodeError:
+            decoded_contents = decode_with_fallback(contents)
+            if decoded_contents is None:
                 return "Binary files are not supported."
+            contents = decoded_contents
 
         return render_template(
             "code.html", code=contents, name=file_extension, **common_params
