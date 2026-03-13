@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PyPI Inspector</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🕵️</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>P</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -29,13 +29,12 @@
     </style>
     {% block head %}{% endblock %}
   </head>
-  <body class="min-h-screen bg-gray-50">
+  <body class="min-h-screen bg-gray-50 flex flex-col">
     <!-- Header -->
     <header class="header-gradient shadow-lg">
       <div class="container mx-auto px-4 py-6">
         <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
           <h1 class="text-3xl font-bold text-white flex items-center space-x-2">
-            <span class="text-4xl">🕵️</span>
             <a href="/" class="hover:text-python-yellow transition-colors duration-200">PyPI Inspector</a>
           </h1>
           
@@ -62,7 +61,7 @@
     </header>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8">
+    <main class="container mx-auto px-4 py-8 flex-1">
       {% block above_body %}{% endblock %}
       
       <!-- Breadcrumb Navigation -->
@@ -147,7 +146,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="mt-16 py-8 bg-gray-100 border-t border-gray-200">
+    <footer class="mt-auto py-8 bg-gray-100 border-t border-gray-200">
       <div class="container mx-auto px-4 text-center">
         <p class="text-gray-600 text-sm">
           Source: <a href="https://github.com/pypi/inspector" 

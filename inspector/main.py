@@ -275,14 +275,14 @@ def distribution(project_name, version, first, second, rest, distname):
     h2_paren = "View this project on PyPI"
     resp = requests_session().get(f"https://pypi.org/pypi/{project_name}/json")
     if resp.status_code == 404:
-        h2_paren = "❌ Project no longer on PyPI"
+        h2_paren = "Project no longer on PyPI"
 
     h3_paren = "View this release on PyPI"
     resp = requests_session().get(
         f"https://pypi.org/pypi/{project_name}/{version}/json"
     )
     if resp.status_code == 404:
-        h3_paren = "❌ Release no longer on PyPI"
+        h3_paren = "Release no longer on PyPI"
 
     if dist:
         file_urls = [
@@ -328,14 +328,14 @@ def file(project_name, version, first, second, rest, distname, filepath):
     h2_paren = "View this project on PyPI"
     resp = requests_session().get(f"https://pypi.org/pypi/{project_name}/json")
     if resp.status_code == 404:
-        h2_paren = "❌ Project no longer on PyPI"
+        h2_paren = "Project no longer on PyPI"
 
     h3_paren = "View this release on PyPI"
     resp = requests_session().get(
         f"https://pypi.org/pypi/{project_name}/{version}/json"
     )
     if resp.status_code == 404:
-        h3_paren = "❌ Release no longer on PyPI"
+        h3_paren = "Release no longer on PyPI"
 
     dist = _get_dist(first, second, rest, distname)
     if dist:
