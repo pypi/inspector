@@ -1,1 +1,45 @@
 {% extends 'base.html' %}
+
+{% block body %}
+<div class="text-center py-12">
+  <div class="mb-8">
+    <h2 class="text-4xl font-bold text-gray-800 mb-4">Welcome to PyPI Inspector</h2>
+    <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+      Analyze and inspect Python packages from the Python Package Index (PyPI). 
+      Search for any package to view its releases, artifacts, and detailed information.
+    </p>
+  </div>
+  
+  <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+    <div class="bg-gradient-to-br from-python-blue to-python-blue-dark rounded-lg p-6 text-white shadow-lg">
+      <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+      <h3 class="text-xl font-semibold mb-2">Search Packages</h3>
+      <p class="text-sm opacity-90">Find any Python package by name</p>
+    </div>
+    
+    <div class="bg-gradient-to-br from-python-yellow to-python-yellow-dark rounded-lg p-6 text-gray-900 shadow-lg">
+      <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+      </svg>
+      <h3 class="text-xl font-semibold mb-2">View Releases</h3>
+      <p class="text-sm">Browse all versions and release history</p>
+    </div>
+    
+    <div class="bg-gradient-to-br from-python-blue to-python-blue-dark rounded-lg p-6 text-white shadow-lg">
+      <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+      </svg>
+      <h3 class="text-xl font-semibold mb-2">Inspect Code</h3>
+      <p class="text-sm opacity-90">Analyze package contents and code</p>
+    </div>
+  </div>
+  
+  <div class="mt-12">
+    <p class="text-gray-500 text-sm">
+      Enter a package name in the search bar above to get started
+    </p>
+  </div>
+</div>
+{% endblock %}
