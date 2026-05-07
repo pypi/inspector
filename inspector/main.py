@@ -302,9 +302,11 @@ def distribution(project_name, version, first, second, rest, distname):
         file_urls = [
             "./" + urllib.parse.quote(filename) for filename in dist.namelist()
         ]
+        file_sizes = dist.sizelist()
         return render_template(
             "links.html",
             links=file_urls,
+            sizes=file_sizes,
             h2=f"{project_name}",
             h2_link=f"/project/{project_name}",
             h2_paren=h2_paren,
