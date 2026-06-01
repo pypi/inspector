@@ -141,6 +141,15 @@ def decode_with_fallback(content_bytes):
     # If we get here, all encodings failed sanity checks (truly binary data)
     return None
 
+def _humanbytes(n):
+    """
+        Convert number to byte format, used for formatting file size
+    """
+    for unit in ("B", "KB", "MB", "GB"):
+        if n < 1024:
+            return f"{n} {unit}" if unit == "B" else f"{n:.1f} {unit}"
+        n /= 1024
+    return f"{n:.1f} TB"
 
 def traces_sampler(sampling_context):
     """
@@ -164,6 +173,7 @@ if SENTRY_DSN := os.environ.get("SENTRY_DSN"):
 app = Flask(__name__)
 
 app.jinja_env.filters["unquote"] = lambda u: urllib.parse.unquote(u)
+app.jinja_env.filters["humanbytes"] = _humanbytes
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
 
@@ -235,9 +245,13 @@ def distributions(project_name, version):
         "." + urllib.parse.urlparse(url["url"]).path + "/"
         for url in resp.json()["urls"]
     ]
+    dist_sizes = [
+        url["size"] for url in resp.json()["urls"]
+    ]
     return render_template(
         "links.html",
         links=dist_urls,
+        sizes=dist_sizes,
         h2=f"{project_name}",
         h2_link=f"/project/{project_name}",
         h2_paren="View this project on PyPI",
@@ -288,9 +302,11 @@ def distribution(project_name, version, first, second, rest, distname):
         file_urls = [
             "./" + urllib.parse.quote(filename) for filename in dist.namelist()
         ]
+        file_sizes = dist.sizelist()
         return render_template(
             "links.html",
             links=file_urls,
+            sizes=file_sizes,
             h2=f"{project_name}",
             h2_link=f"/project/{project_name}",
             h2_paren=h2_paren,
