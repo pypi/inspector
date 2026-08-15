@@ -195,5 +195,19 @@
         });
       });
     </script>
+
+    <script>
+      // Progressive enhancement: expand/collapse a capped [data-expandable] container.
+      document.querySelectorAll("[data-expand-toggle]").forEach(function (button) {
+        const container = button.closest("[data-expandable]");
+        if (!container) return;
+        const collapsedLabel = button.textContent;
+
+        button.addEventListener("click", function () {
+          const expanded = container.classList.toggle("is-expanded");
+          button.textContent = expanded ? "Show less" : collapsedLabel;
+        });
+      });
+    </script>
   </body>
 </html>

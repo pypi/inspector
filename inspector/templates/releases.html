@@ -32,7 +32,8 @@
       </span>
     </div>
 
-    <div class="table-scroll">
+    <div class="expandable" {% if releases|length > 15 %}data-expandable{% endif %}>
+    <div class="table-scroll {% if releases|length > 15 %}table-scroll--capped{% endif %}">
       <table class="data-table data-table--sortable">
         <thead>
           <tr>
@@ -76,6 +77,10 @@
           {% endfor %}
         </tbody>
       </table>
+    </div>
+    {% if releases|length > 15 %}
+    <button type="button" class="expand-toggle" data-expand-toggle>Show all {{ releases|length }} versions</button>
+    {% endif %}
     </div>
   </div>
 

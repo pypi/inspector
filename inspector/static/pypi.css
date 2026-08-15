@@ -587,6 +587,36 @@ a:focus-visible {
   background: var(--card);
 }
 
+.table-scroll--capped {
+  max-height: 560px;
+  overflow-y: auto;
+}
+
+.expandable.is-expanded .table-scroll--capped {
+  max-height: none;
+}
+
+.expand-toggle {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--primary);
+  background: var(--card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.expand-toggle:hover {
+  background: var(--row-hover);
+  color: var(--primary-dark);
+}
+
 table.data-table {
   width: 100%;
   border-collapse: collapse;
