@@ -822,6 +822,41 @@ table.data-table {
   color: var(--grey-mid);
 }
 
+/* Release table filter */
+
+.table-filter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.table-filter input {
+  flex: 1 1 auto;
+  max-width: 280px;
+  min-height: 38px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+}
+
+.table-filter input:hover,
+.table-filter input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-tint);
+  outline: none;
+}
+
+.table-filter__count {
+  color: var(--grey-mid);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
 /* Version cell (release history) */
 
 .version-cell {

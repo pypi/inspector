@@ -217,5 +217,34 @@
         });
       });
     </script>
+
+    <script>
+      // Progressive enhancement: filter a [data-table-filter-scope]'s table
+      // rows by text match. Hidden until JS confirms it actually works.
+      document.querySelectorAll("[data-table-filter-scope]").forEach(function (scope) {
+        const filter = scope.querySelector("[data-table-filter]");
+        const input = scope.querySelector("[data-table-filter-input]");
+        const count = scope.querySelector("[data-table-filter-count]");
+        const rows = Array.from(scope.querySelectorAll("tbody tr"));
+        if (!filter || !input || !rows.length) return;
+
+        filter.hidden = false;
+        const total = rows.length;
+
+        const update = function () {
+          const query = input.value.trim().toLowerCase();
+          let shown = 0;
+          rows.forEach(function (row) {
+            const match = !query || row.textContent.toLowerCase().includes(query);
+            row.hidden = !match;
+            if (match) shown++;
+          });
+          count.textContent = query ? shown + " of " + total : total + " versions";
+        };
+
+        input.addEventListener("input", update);
+        update();
+      });
+    </script>
   </body>
 </html>

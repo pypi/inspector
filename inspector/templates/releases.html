@@ -53,6 +53,14 @@
       </span>
     </div>
 
+    <div {% if releases|length > 15 %}data-table-filter-scope{% endif %}>
+    {% if releases|length > 15 %}
+    <div class="table-filter" data-table-filter hidden>
+      <input type="search" placeholder="Filter versions…" aria-label="Filter versions" data-table-filter-input>
+      <span class="table-filter__count" data-table-filter-count></span>
+    </div>
+    {% endif %}
+
     <div class="expandable" {% if releases|length > 15 %}data-expandable{% endif %}>
     <div class="table-scroll {% if releases|length > 15 %}table-scroll--capped{% endif %}">
       <table class="data-table data-table--sortable">
@@ -112,6 +120,7 @@
     {% if releases|length > 15 %}
     <button type="button" class="expand-toggle" data-expand-toggle>Show all {{ releases|length }} versions</button>
     {% endif %}
+    </div>
     </div>
   </div>
 
