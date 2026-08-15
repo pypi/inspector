@@ -2,6 +2,7 @@ import os
 import urllib.parse
 
 import gunicorn.http.errors
+import requests
 import sentry_sdk
 
 from flask import Flask, Response, abort, redirect, render_template, request, url_for
@@ -64,6 +65,24 @@ def _parse_dependency(raw):
     except InvalidRequirement:
         return {"raw": raw, "name": None}
     return {"raw": raw, "name": canonicalize_name(name)}
+
+
+def _get_project_status(project_name):
+    """Look up a project's PEP 792 status (active/archived/quarantined) from
+    the Simple API. Unlike the legacy JSON API, the Simple API doesn't hide
+    quarantined projects -- it's the public, machine-readable way this is
+    meant to be surfaced. Returns None if the lookup fails for any reason."""
+    try:
+        resp = requests_session().get(
+            f"https://pypi.org/simple/{project_name}/",
+            headers={"Accept": "application/vnd.pypi.simple.v1+json"},
+            timeout=5,
+        )
+        if resp.status_code != 200:
+            return None
+        return (resp.json().get("project-status") or {}).get("status")
+    except (requests.RequestException, ValueError):
+        return None
 
 
 def _is_likely_text(decoded_str):
@@ -242,8 +261,17 @@ def versions(project_name):
     resp = requests_session().get(f"https://pypi.org/pypi/{project_name}/json")
     pypi_project_url = f"https://pypi.org/project/{project_name}"
 
-    # Self-host 404 page to mitigate iframe embeds
+    # The legacy JSON API hides quarantined projects entirely (so installers
+    # won't touch them), unlike the Simple API's PEP 792 status marker, which
+    # is the public, intended way to surface this. Check it before assuming
+    # a 404 means "never existed".
     if resp.status_code == 404:
+        if _get_project_status(project_name) == "quarantined":
+            return render_template(
+                "quarantined.html",
+                h2=project_name,
+                pypi_project_url=pypi_project_url,
+            )
         return render_template("404.html")
     if resp.status_code != 200:
         return redirect(pypi_project_url, 307)
@@ -275,10 +303,13 @@ def versions(project_name):
             "prerelease": parse(version).is_prerelease,
         }
 
+    project_status = _get_project_status(project_name)
+
     return render_template(
         "releases.html",
         releases=sorted_releases,
         release_status=release_status,
+        project_status=project_status,
         latest_version=info.get("version"),
         summary=info.get("summary"),
         author=info.get("author") or info.get("maintainer"),
