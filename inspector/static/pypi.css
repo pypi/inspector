@@ -15,6 +15,8 @@
   --warning-tint: #fdf1e8;
   --warning-tint-border: #f3d5be;
   --danger: #dc2626;
+  --danger-tint: #fdecec;
+  --danger-tint-border: #f5c6c6;
   --highlight: #ffd343;
   --ground: #f7f7f7;
   --card: #ffffff;
@@ -702,6 +704,56 @@ a.is-yanked:hover {
 .callout--warning {
   background: var(--warning-tint);
   border-color: var(--warning-tint-border);
+}
+
+.callout--danger {
+  background: var(--danger-tint);
+  border-color: var(--danger-tint-border);
+}
+
+.callout--danger .callout__title {
+  color: var(--danger);
+}
+
+.callout__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.callout__list li {
+  border-top: 1px solid var(--danger-tint-border);
+  padding-top: 12px;
+}
+
+.callout__list li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.callout__list .vuln-id {
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.callout__list .vuln-fixed {
+  color: var(--grey-mid);
+  font-size: 0.9rem;
+}
+
+.callout__more {
+  margin-top: 12px;
+}
+
+.callout__more summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--danger);
+}
+
+.callout__more .callout__list {
+  margin-top: 12px;
 }
 
 .callout__title {

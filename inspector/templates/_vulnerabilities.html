@@ -1,0 +1,28 @@
+{% if vulnerabilities %}
+<div class="callout callout--danger">
+  <h2 class="callout__title">{{ vulnerabilities|length }} known vulnerabilit{% if vulnerabilities|length != 1 %}ies{% else %}y{% endif %} {{ vuln_scope }}</h2>
+  <ul class="callout__list">
+    {% for vuln in vulnerabilities[:5] %}
+    <li>
+      <a class="vuln-id" href="{{ vuln.link }}" rel="noopener" target="_blank">{{ vuln.id }}</a>
+      {% if vuln.details %}<p>{{ vuln.details|truncate(220) }}</p>{% endif %}
+      {% if vuln.fixed_in %}<p class="vuln-fixed">Fixed in: {{ vuln.fixed_in|join(', ') }}</p>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% if vulnerabilities|length > 5 %}
+  <details class="callout__more">
+    <summary>Show all {{ vulnerabilities|length }}</summary>
+    <ul class="callout__list">
+      {% for vuln in vulnerabilities[5:] %}
+      <li>
+        <a class="vuln-id" href="{{ vuln.link }}" rel="noopener" target="_blank">{{ vuln.id }}</a>
+        {% if vuln.details %}<p>{{ vuln.details|truncate(220) }}</p>{% endif %}
+        {% if vuln.fixed_in %}<p class="vuln-fixed">Fixed in: {{ vuln.fixed_in|join(', ') }}</p>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </details>
+  {% endif %}
+</div>
+{% endif %}

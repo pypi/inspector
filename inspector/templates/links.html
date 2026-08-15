@@ -6,6 +6,10 @@
   <p>{{ h3 or h2 }}</p>
 </div>
 
+{% with vuln_scope = "in this release" %}
+  {% include "_vulnerabilities.html" %}
+{% endwith %}
+
 <div class="panel panel--flush">
   <ul class="file-list">
     {% for link in links %}

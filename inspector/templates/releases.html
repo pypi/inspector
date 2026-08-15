@@ -17,6 +17,10 @@
   </div>
 </div>
 
+{% with vuln_scope = "in " ~ latest_version %}
+  {% include "_vulnerabilities.html" %}
+{% endwith %}
+
 <div class="layout">
   <div class="layout__main">
     <div class="tabs">

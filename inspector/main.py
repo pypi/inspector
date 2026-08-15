@@ -229,6 +229,7 @@ def versions(project_name):
         author=info.get("author") or info.get("maintainer"),
         license=info.get("license"),
         project_links=project_links,
+        vulnerabilities=data.get("vulnerabilities") or [],
         h2=project_name,
         h2_link=f"/project/{project_name}",
         h2_paren="View this project on PyPI",
@@ -254,13 +255,15 @@ def distributions(project_name, version):
     if resp.status_code != 200:
         return redirect(f"/project/{project_name}/")
 
+    version_data = resp.json()
     dist_urls = [
         "." + urllib.parse.urlparse(url["url"]).path + "/"
-        for url in resp.json()["urls"]
+        for url in version_data["urls"]
     ]
     return render_template(
         "links.html",
         links=dist_urls,
+        vulnerabilities=version_data.get("vulnerabilities") or [],
         h2=f"{project_name}",
         h2_link=f"/project/{project_name}",
         h2_paren="View this project on PyPI",
