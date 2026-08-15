@@ -892,6 +892,19 @@ table.data-table {
   color: var(--primary);
 }
 
+/* File type icon (package files table) */
+
+.filetype {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filetype svg {
+  flex-shrink: 0;
+  color: var(--grey-mid);
+}
+
 /* SHA256 cell (file table) */
 
 .hash-cell {
