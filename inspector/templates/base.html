@@ -151,14 +151,21 @@
     </footer>
 
     <script>
-      // Progressive enhancement: copy-to-clipboard for [data-copy-target] buttons.
+      // Progressive enhancement: copy-to-clipboard for buttons carrying either
+      // data-copy-target (id of an element to read textContent from) or
+      // data-copy-text (the literal text to copy).
       document.addEventListener("click", function (event) {
-        const button = event.target.closest("[data-copy-target]");
+        const button = event.target.closest("[data-copy-target], [data-copy-text]");
         if (!button) return;
-        const source = document.getElementById(button.dataset.copyTarget);
-        if (!source) return;
 
-        navigator.clipboard.writeText(source.textContent.trim()).then(function () {
+        let text = button.dataset.copyText;
+        if (text === undefined) {
+          const source = document.getElementById(button.dataset.copyTarget);
+          if (!source) return;
+          text = source.textContent.trim();
+        }
+
+        navigator.clipboard.writeText(text).then(function () {
           button.classList.add("is-copied");
           setTimeout(function () {
             button.classList.remove("is-copied");

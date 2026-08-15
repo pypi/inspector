@@ -822,6 +822,41 @@ table.data-table {
   color: var(--grey-mid);
 }
 
+/* Version cell (release history) */
+
+.version-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.version-cell__copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  color: var(--grey-mid);
+  background: none;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 100ms ease;
+}
+
+.data-table tr:hover .version-cell__copy,
+.version-cell__copy:focus-visible,
+.version-cell__copy.is-copied {
+  opacity: 1;
+}
+
+.version-cell__copy:hover {
+  background: var(--ground);
+  color: var(--primary);
+}
+
 /* SHA256 cell (file table) */
 
 .hash-cell {
