@@ -17,7 +17,6 @@ from .errors import InspectorError
 from .legacy import parse
 from .utilities import pypi_report_form, requests_session
 
-
 PACKAGE_TYPE_LABELS = {
     "bdist_wheel": "Wheel",
     "sdist": "Source",
