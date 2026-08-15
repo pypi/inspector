@@ -5,6 +5,7 @@ import gunicorn.http.errors
 import sentry_sdk
 
 from flask import Flask, Response, abort, redirect, render_template, request, url_for
+from packaging.requirements import InvalidRequirement, Requirement
 from packaging.utils import canonicalize_name
 from sentry_sdk.integrations.flask import FlaskIntegration
 
@@ -37,6 +38,32 @@ def _human_size(num_bytes):
             return f"{size:.0f} {unit}" if unit == "B" else f"{size:.1f} {unit}"
         size /= 1024
     return f"{size:.1f} GB"
+
+
+def _parse_classifiers(classifiers):
+    """Pull a development-status label and supported Python versions out of
+    PyPI's classifier strings, e.g. 'Development Status :: 5 - Production/Stable'
+    and 'Programming Language :: Python :: 3.11'."""
+    development_status = None
+    python_versions = []
+    for classifier in classifiers:
+        if classifier.startswith("Development Status :: "):
+            development_status = classifier.split(" :: ", 1)[1]
+        elif classifier.startswith("Programming Language :: Python :: "):
+            version = classifier.rsplit(" :: ", 1)[-1]
+            if "." in version and version[0].isdigit():
+                python_versions.append(version)
+    return development_status, sorted(python_versions, key=parse)
+
+
+def _parse_dependency(raw):
+    """Turn a requires_dist entry into a display string plus a link to that
+    dependency's own inspector page, when the name is parseable."""
+    try:
+        name = Requirement(raw).name
+    except InvalidRequirement:
+        return {"raw": raw, "name": None}
+    return {"raw": raw, "name": canonicalize_name(name)}
 
 
 def _is_likely_text(decoded_str):
@@ -233,6 +260,10 @@ def versions(project_name):
     if info.get("home_page") and "Homepage" not in project_links:
         project_links["Homepage"] = info["home_page"]
 
+    development_status, python_versions = _parse_classifiers(
+        info.get("classifiers") or []
+    )
+
     release_status = {}
     for version, files in sorted_releases.items():
         yanked_reason = next(
@@ -254,6 +285,14 @@ def versions(project_name):
         license=info.get("license"),
         project_links=project_links,
         vulnerabilities=data.get("vulnerabilities") or [],
+        requires_python=info.get("requires_python"),
+        development_status=development_status,
+        python_versions=python_versions,
+        dependencies=[
+            _parse_dependency(r)
+            for r in (info.get("requires_dist") or [])
+            if "extra ==" not in r
+        ],
         h2=project_name,
         h2_link=f"/project/{project_name}",
         h2_paren="View this project on PyPI",

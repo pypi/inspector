@@ -1,5 +1,15 @@
 {% extends 'base.html' %}
 
+{% macro dependency_item(dep) %}
+<li>
+  {% if dep.name %}
+    <a href="/project/{{ dep.name }}/"><code>{{ dep.raw }}</code></a>
+  {% else %}
+    <code>{{ dep.raw }}</code>
+  {% endif %}
+</li>
+{% endmacro %}
+
 {% block body %}
 <div class="project-banner">
   <h1>{{ h2 }}{% if latest_version %} <span class="version">{{ latest_version }}</span>{% endif %}</h1>
@@ -126,8 +136,48 @@
           <dd>{{ license }}</dd>
         </div>
         {% endif %}
+        {% if development_status %}
+        <div class="field">
+          <dt>Status</dt>
+          <dd>{{ development_status }}</dd>
+        </div>
+        {% endif %}
+        {% if requires_python %}
+        <div class="field">
+          <dt>Requires Python</dt>
+          <dd><code>{{ requires_python }}</code></dd>
+        </div>
+        {% endif %}
       </dl>
+      {% if python_versions %}
+      <div class="chip-row">
+        {% for version in python_versions %}
+        <span class="pill pill--neutral">Python {{ version }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
     </div>
+
+    {% if dependencies %}
+    <div class="panel">
+      <h2 class="panel__title">Dependencies</h2>
+      <ul class="dependency-list">
+        {% for dep in dependencies[:10] %}
+          {{ dependency_item(dep) }}
+        {% endfor %}
+      </ul>
+      {% if dependencies|length > 10 %}
+      <details class="disclosure">
+        <summary>Show all {{ dependencies|length }}</summary>
+        <ul class="dependency-list">
+          {% for dep in dependencies[10:] %}
+            {{ dependency_item(dep) }}
+          {% endfor %}
+        </ul>
+      </details>
+      {% endif %}
+    </div>
+    {% endif %}
   </aside>
 </div>
 {% endblock %}

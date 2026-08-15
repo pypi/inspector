@@ -553,6 +553,48 @@ a:focus-visible {
   word-break: break-word;
 }
 
+.panel .field dd code {
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.dependency-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dependency-list code {
+  font-size: 0.85rem;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.dependency-list a {
+  text-decoration: none;
+}
+
+.dependency-list a code {
+  color: var(--primary);
+}
+
+.dependency-list a:hover code {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
 .link-list {
   list-style: none;
   margin: 0;
@@ -853,18 +895,26 @@ a.is-yanked:hover {
   font-size: 0.9rem;
 }
 
-.callout__more {
+.disclosure {
   margin-top: 12px;
 }
 
-.callout__more summary {
+.disclosure summary {
   cursor: pointer;
   font-weight: 600;
   font-size: 0.9rem;
+  color: var(--primary);
+}
+
+.disclosure summary:hover {
+  color: var(--primary-dark);
+}
+
+.callout--danger .disclosure summary {
   color: var(--danger);
 }
 
-.callout__more .callout__list {
+.disclosure .callout__list {
   margin-top: 12px;
 }
 

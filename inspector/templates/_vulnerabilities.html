@@ -11,7 +11,7 @@
     {% endfor %}
   </ul>
   {% if vulnerabilities|length > 5 %}
-  <details class="callout__more">
+  <details class="disclosure">
     <summary>Show all {{ vulnerabilities|length }}</summary>
     <ul class="callout__list">
       {% for vuln in vulnerabilities[5:] %}
