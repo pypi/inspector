@@ -250,6 +250,10 @@ if SENTRY_DSN := os.environ.get("SENTRY_DSN"):
 
 app = Flask(__name__)
 
+# Reused across requests so a project page doesn't pay thread spin-up/teardown
+# cost on every hit -- see versions() below.
+_STATUS_EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+
 app.jinja_env.filters["unquote"] = lambda u: urllib.parse.unquote(u)
 app.jinja_env.filters["filesizeformat"] = _human_size
 app.jinja_env.filters["plain_text_preview"] = _plain_text_preview
@@ -283,13 +287,9 @@ def versions(project_name):
     # concurrently -- they're independent requests to the same host, and
     # running them in series would add the Simple API's latency to every
     # single project page load for no reason.
-    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-        json_future = executor.submit(
-            requests_session().get, f"https://pypi.org/pypi/{project_name}/json"
-        )
-        status_future = executor.submit(_get_project_status, project_name)
-        resp = json_future.result()
-        project_status = status_future.result()
+    status_future = _STATUS_EXECUTOR.submit(_get_project_status, project_name)
+    resp = requests_session().get(f"https://pypi.org/pypi/{project_name}/json")
+    project_status = status_future.result()
 
     # The legacy JSON API hides quarantined projects entirely (so installers
     # won't touch them), unlike the Simple API's PEP 792 status marker, which

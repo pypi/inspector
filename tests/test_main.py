@@ -101,17 +101,17 @@ def test_versions(monkeypatch):
     inspector.main.versions("foo")
 
     # The JSON and Simple API requests run concurrently, so their relative
-    # order isn't guaranteed -- compare sorted by repr instead of as a set,
-    # since a call's kwargs (headers dict) aren't hashable.
-    expected_calls = [
-        pretend.call("https://pypi.org/pypi/foo/json"),
+    # order isn't guaranteed -- check membership rather than an ordered list.
+    assert len(get.calls) == 2
+    assert pretend.call("https://pypi.org/pypi/foo/json") in get.calls
+    assert (
         pretend.call(
             "https://pypi.org/simple/foo/",
             headers={"Accept": "application/vnd.pypi.simple.v1+json"},
             timeout=5,
-        ),
-    ]
-    assert sorted(get.calls, key=repr) == sorted(expected_calls, key=repr)
+        )
+        in get.calls
+    )
     assert render_template.calls == [
         pretend.call(
             "releases.html",
