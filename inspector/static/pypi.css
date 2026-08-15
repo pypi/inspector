@@ -374,6 +374,35 @@ a:focus-visible {
   color: inherit;
 }
 
+/* Shared "Copied!" tooltip for any [data-copy-target] button. */
+
+.copy-btn {
+  position: relative;
+}
+
+.copy-btn::after {
+  content: "Copied!";
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: var(--text);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.copy-btn.is-copied::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 .pip-install__copy {
   display: inline-flex;
   align-items: center;
