@@ -293,6 +293,7 @@ def versions(project_name):
 
     release_status = {}
     for version, files in sorted_releases.items():
+        files = files or []
         yanked_reason = next(
             (f["yanked_reason"] for f in files if f.get("yanked")), None
         )
