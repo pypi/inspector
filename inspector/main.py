@@ -1,10 +1,14 @@
+import concurrent.futures
 import os
+import re
 import urllib.parse
 
 import gunicorn.http.errors
+import requests
 import sentry_sdk
 
 from flask import Flask, Response, abort, redirect, render_template, request, url_for
+from packaging.requirements import InvalidRequirement, Requirement
 from packaging.utils import canonicalize_name
 from sentry_sdk.integrations.flask import FlaskIntegration
 
@@ -14,6 +18,89 @@ from .distribution import _get_dist
 from .errors import InspectorError
 from .legacy import parse
 from .utilities import pypi_report_form, requests_session
+
+PACKAGE_TYPE_LABELS = {
+    "bdist_wheel": "Wheel",
+    "sdist": "Source",
+    "bdist_egg": "Egg",
+    "bdist_msi": "MSI",
+    "bdist_rpm": "RPM",
+    "bdist_dmg": "DMG",
+    "bdist_wininst": "Windows Installer",
+}
+
+
+def _plain_text_preview(markdown_text):
+    """OSV/PySEC 'details' text is markdown (headings, emphasis) -- we
+    deliberately don't render it as HTML since it's untrusted third-party
+    content, but printing it raw shows literal "###" and "**" to the reader.
+    Strip the common markers for a clean plain-text preview instead."""
+    if not markdown_text:
+        return markdown_text
+    lines = [
+        line
+        for line in markdown_text.splitlines()
+        if not re.match(r"^\s{0,3}#{1,6}\s", line)
+    ]
+    text = " ".join(line.strip() for line in lines if line.strip())
+    text = re.sub(r"[*_`]{1,3}", "", text)
+    return text
+
+
+def _human_size(num_bytes):
+    """Render a byte count as a short human-readable string, e.g. '12.3 KB'."""
+    if num_bytes is None:
+        return ""
+    size = float(num_bytes)
+    for unit in ("B", "KB", "MB", "GB"):
+        if size < 1024 or unit == "GB":
+            return f"{size:.0f} {unit}" if unit == "B" else f"{size:.1f} {unit}"
+        size /= 1024
+    return f"{size:.1f} GB"
+
+
+def _parse_classifiers(classifiers):
+    """Pull a development-status label and supported Python versions out of
+    PyPI's classifier strings, e.g. 'Development Status :: 5 - Production/Stable'
+    and 'Programming Language :: Python :: 3.11'."""
+    development_status = None
+    python_versions = []
+    for classifier in classifiers:
+        if classifier.startswith("Development Status :: "):
+            development_status = classifier.split(" :: ", 1)[1]
+        elif classifier.startswith("Programming Language :: Python :: "):
+            version = classifier.rsplit(" :: ", 1)[-1]
+            if "." in version and version[0].isdigit():
+                python_versions.append(version)
+    return development_status, sorted(python_versions, key=parse)
+
+
+def _parse_dependency(raw):
+    """Turn a requires_dist entry into a display string plus a link to that
+    dependency's own inspector page, when the name is parseable."""
+    try:
+        name = Requirement(raw).name
+    except InvalidRequirement:
+        return {"raw": raw, "name": None}
+    return {"raw": raw, "name": canonicalize_name(name)}
+
+
+def _get_project_status(project_name):
+    """Look up a project's PEP 792 status (active/archived/quarantined) from
+    the Simple API. Unlike the legacy JSON API, the Simple API doesn't hide
+    quarantined projects -- it's the public, machine-readable way this is
+    meant to be surfaced. Returns None if the lookup fails for any reason."""
+    try:
+        resp = requests_session().get(
+            f"https://pypi.org/simple/{project_name}/",
+            headers={"Accept": "application/vnd.pypi.simple.v1+json"},
+            timeout=5,
+        )
+        if resp.status_code != 200:
+            return None
+        return (resp.json().get("project-status") or {}).get("status")
+    except (requests.RequestException, ValueError):
+        return None
 
 
 def _is_likely_text(decoded_str):
@@ -163,7 +250,13 @@ if SENTRY_DSN := os.environ.get("SENTRY_DSN"):
 
 app = Flask(__name__)
 
+# Reused across requests so a project page doesn't pay thread spin-up/teardown
+# cost on every hit -- see versions() below.
+_STATUS_EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+
 app.jinja_env.filters["unquote"] = lambda u: urllib.parse.unquote(u)
+app.jinja_env.filters["filesizeformat"] = _human_size
+app.jinja_env.filters["plain_text_preview"] = _plain_text_preview
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
 
@@ -188,24 +281,78 @@ def versions(project_name):
             url_for("versions", project_name=canonicalize_name(project_name)), 301
         )
 
-    resp = requests_session().get(f"https://pypi.org/pypi/{project_name}/json")
     pypi_project_url = f"https://pypi.org/project/{project_name}"
 
-    # Self-host 404 page to mitigate iframe embeds
+    # Fetch the legacy JSON API and the Simple API's PEP 792 status
+    # concurrently -- they're independent requests to the same host, and
+    # running them in series would add the Simple API's latency to every
+    # single project page load for no reason.
+    status_future = _STATUS_EXECUTOR.submit(_get_project_status, project_name)
+    resp = requests_session().get(f"https://pypi.org/pypi/{project_name}/json")
+    project_status = status_future.result()
+
+    # The legacy JSON API hides quarantined projects entirely (so installers
+    # won't touch them), unlike the Simple API's PEP 792 status marker, which
+    # is the public, intended way to surface this. Check it before assuming
+    # a 404 means "never existed".
     if resp.status_code == 404:
+        if project_status == "quarantined":
+            return render_template(
+                "quarantined.html",
+                h2=project_name,
+                pypi_project_url=pypi_project_url,
+            )
         return render_template("404.html")
     if resp.status_code != 200:
         return redirect(pypi_project_url, 307)
 
-    releases = resp.json()["releases"]
+    data = resp.json()
+    releases = data["releases"]
     sorted_releases = {
         version: releases[version]
         for version in sorted(releases.keys(), key=parse, reverse=True)
     }
 
+    info = data.get("info") or {}
+    project_links = dict(info.get("project_urls") or {})
+    if info.get("home_page") and "Homepage" not in project_links:
+        project_links["Homepage"] = info["home_page"]
+
+    development_status, python_versions = _parse_classifiers(
+        info.get("classifiers") or []
+    )
+
+    release_status = {}
+    for version, files in sorted_releases.items():
+        files = files or []
+        yanked_reason = next(
+            (f["yanked_reason"] for f in files if f.get("yanked")), None
+        )
+        release_status[version] = {
+            "yanked": any(f.get("yanked") for f in files),
+            "yanked_reason": yanked_reason,
+            "prerelease": parse(version).is_prerelease,
+        }
+
     return render_template(
         "releases.html",
         releases=sorted_releases,
+        release_status=release_status,
+        project_status=project_status,
+        latest_version=info.get("version"),
+        summary=info.get("summary"),
+        author=info.get("author") or info.get("maintainer"),
+        license=info.get("license"),
+        project_links=project_links,
+        vulnerabilities=data.get("vulnerabilities") or [],
+        requires_python=info.get("requires_python"),
+        development_status=development_status,
+        python_versions=python_versions,
+        dependencies=[
+            _parse_dependency(r)
+            for r in (info.get("requires_dist") or [])
+            if "extra ==" not in r
+        ],
         h2=project_name,
         h2_link=f"/project/{project_name}",
         h2_paren="View this project on PyPI",
@@ -231,13 +378,28 @@ def distributions(project_name, version):
     if resp.status_code != 200:
         return redirect(f"/project/{project_name}/")
 
-    dist_urls = [
-        "." + urllib.parse.urlparse(url["url"]).path + "/"
-        for url in resp.json()["urls"]
+    version_data = resp.json()
+    files = [
+        {
+            "path": "." + urllib.parse.urlparse(url["url"]).path + "/",
+            "filename": url.get("filename"),
+            "size": url.get("size"),
+            "upload_time": url.get("upload_time"),
+            "python_version": url.get("python_version"),
+            "packagetype": PACKAGE_TYPE_LABELS.get(
+                url.get("packagetype"), url.get("packagetype")
+            ),
+            "requires_python": url.get("requires_python"),
+            "sha256": (url.get("digests") or {}).get("sha256"),
+            "yanked": url.get("yanked"),
+            "yanked_reason": url.get("yanked_reason"),
+        }
+        for url in version_data["urls"]
     ]
     return render_template(
         "links.html",
-        links=dist_urls,
+        files=files,
+        vulnerabilities=version_data.get("vulnerabilities") or [],
         h2=f"{project_name}",
         h2_link=f"/project/{project_name}",
         h2_paren="View this project on PyPI",
@@ -275,14 +437,14 @@ def distribution(project_name, version, first, second, rest, distname):
     h2_paren = "View this project on PyPI"
     resp = requests_session().get(f"https://pypi.org/pypi/{project_name}/json")
     if resp.status_code == 404:
-        h2_paren = "❌ Project no longer on PyPI"
+        h2_paren = "Project no longer on PyPI"
 
     h3_paren = "View this release on PyPI"
     resp = requests_session().get(
         f"https://pypi.org/pypi/{project_name}/{version}/json"
     )
     if resp.status_code == 404:
-        h3_paren = "❌ Release no longer on PyPI"
+        h3_paren = "Release no longer on PyPI"
 
     if dist:
         file_urls = [
@@ -328,14 +490,14 @@ def file(project_name, version, first, second, rest, distname, filepath):
     h2_paren = "View this project on PyPI"
     resp = requests_session().get(f"https://pypi.org/pypi/{project_name}/json")
     if resp.status_code == 404:
-        h2_paren = "❌ Project no longer on PyPI"
+        h2_paren = "Project no longer on PyPI"
 
     h3_paren = "View this release on PyPI"
     resp = requests_session().get(
         f"https://pypi.org/pypi/{project_name}/{version}/json"
     )
     if resp.status_code == 404:
-        h3_paren = "❌ Release no longer on PyPI"
+        h3_paren = "Release no longer on PyPI"
 
     dist = _get_dist(first, second, rest, distname)
     if dist:

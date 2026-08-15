@@ -1,1 +1,47 @@
 {% extends 'base.html' %}
+
+{% block above_body %}
+<div class="page-hero">
+  <div class="page-hero__container">
+    <h1>Inspect Python packages<br>hosted on the Python Package Index</h1>
+    <form action="/" method="get">
+      <div class="search-field">
+        <input type="text" name="project" placeholder="Enter a project name…" autocomplete="off">
+        <button type="submit" aria-label="Search">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block body %}
+<div class="feature-grid">
+  <div class="feature">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+    </svg>
+    <h3>Search packages</h3>
+    <p class="text-muted">Find any project on PyPI by name</p>
+  </div>
+
+  <div class="feature">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+    </svg>
+    <h3>Browse releases</h3>
+    <p class="text-muted">See every version and its artifacts</p>
+  </div>
+
+  <div class="feature">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+    </svg>
+    <h3>Inspect code</h3>
+    <p class="text-muted">Read source and disassembled bytecode</p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="status-banner status-banner--quarantined">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+  </svg>
+  <div>
+    <strong>Quarantined</strong>
+    <p>This project has been quarantined by PyPI admins pending a security review.</p>
+  </div>
+</div>
+
+<div class="not-found">
+  <h1>{{ h2 }}</h1>
+  <p class="text-muted">
+    While in quarantine, this project cannot be installed or modified, and
+    its files aren't available for inspection here. PyPI's own project page
+    has more detail.
+  </p>
+
+  <a href="{{ pypi_project_url }}" class="btn btn--primary" rel="noopener" target="_blank">
+    View on PyPI
+  </a>
+</div>
+{% endblock %}

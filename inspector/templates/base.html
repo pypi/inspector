@@ -1,69 +1,250 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    {% block head %}{% endblock %}
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🕵️</text></svg>">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyPI Inspector</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>P</text></svg>">
+    <link rel="stylesheet" href="/static/fonts/source-sans-3/source-sans-3.css">
+    <link rel="stylesheet" href="/static/pypi.css">
     <script src="/static/inspector.js" defer></script>
+    {% block head %}{% endblock %}
   </head>
   <body>
-    <main>
-      <h1><a href="/">Inspector</a></h1>
-      <form action="/">
-        {% if h2 %}
-          <input id="project-input" type="text" name="project" placeholder="Project name" value="{{ h2 }}" autocomplete="off">
-        {% else %}
-          <input id="project-input" type="text" name="project" placeholder="Project name" autocomplete="off">
-        {% endif %}
-        <input type="submit">
-      </form>
-      <hr>
-      {% block above_body %}{% endblock %}
-      {% if h2 %}
-      <h2>
-        {% if h2_link %}
-        <a href="{{ h2_link }}">{{ h2 }}</a>
-        {% else %}
-        {{ h2 }}
-        {% endif %}
-        {% if h2_paren_link %}
-        (<a href="{{ h2_paren_link }}">{{ h2_paren }}</a>)
-        {% endif %}
-      </h2>
+    <!-- Header -->
+    <header class="site-header">
+      <div class="site-header__container">
+        <a href="/" class="site-header__brand">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2l9 4.9v10.2L12 22l-9-4.9V6.9L12 2z"></path>
+          </svg>
+          PyPI Inspector
+        </a>
+
+        <form action="/" method="get" class="site-header__search">
+          <div class="search-field">
+            <input id="project-input" type="text" name="project" placeholder="Search projects…"
+                   value="{{ h2 or '' }}" autocomplete="off">
+            <button type="submit" aria-label="Search">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </button>
+          </div>
+        </form>
+      </div>
+    </header>
+
+    <!-- Full-bleed content (e.g. homepage hero) -->
+    {% block above_body %}{% endblock %}
+
+    <!-- Main Content -->
+    <div class="shell">
+      <!-- Breadcrumb Navigation -->
+      {% if h2 or h3 or h4 or h5 %}
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="/">Home</a></li>
+
+          {% if h2 %}
+          <li>
+            {% if h2_link %}
+              <a href="{{ h2_link }}">{{ h2 }}</a>
+            {% else %}
+              <span class="current">{{ h2 }}</span>
+            {% endif %}
+            {% if h2_paren_link %}
+              (<a href="{{ h2_paren_link }}">{{ h2_paren }}</a>)
+            {% endif %}
+          </li>
+          {% endif %}
+
+          {% if h3 %}
+          <li>
+            {% if h3_link %}
+              <a href="{{ h3_link }}">{{ h3 }}</a>
+            {% else %}
+              <span class="current">{{ h3 }}</span>
+            {% endif %}
+            {% if h3_paren_link %}
+              (<a href="{{ h3_paren_link }}">{{ h3_paren }}</a>)
+            {% endif %}
+          </li>
+          {% endif %}
+
+          {% if h4 %}
+          <li>
+            {% if h4_link %}
+              <a href="{{ h4_link }}">{{ h4 }}</a>
+            {% else %}
+              <span class="current">{{ h4 }}</span>
+            {% endif %}
+          </li>
+          {% endif %}
+
+          {% if h5 %}
+          <li><span class="current">{{ h5 }}</span></li>
+          {% endif %}
+        </ol>
+      </nav>
       {% endif %}
-      {% if h3 %}
-      <h3>
-        {% if h3_link %}
-        <a href="{{ h3_link }}">{{ h3 }}</a>
-        {% else %}
-        {{ h3 }}
-        {% endif %}
-        {% if h3_paren_link %}
-        (<a href="{{ h3_paren_link }}">{{ h3_paren }}</a>)
-        {% endif %}
-      </h3>
-      {% endif %}
-      {% if h4 %}
-      <h4>
-        {% if h4_link %}
-        <a href="{{ h4_link }}">{{ h4 }}</a>
-        {% else %}
-        {{ h4 }}
-        {% endif %}
-      </h4>
-      {% endif %}
-      {% if h5 %}
-      <h5>
-        {% if h5_link %}
-        <a href="{{ h5_link }}">{{ h5 }}</a>
-        {% else %}
-        {{ h5 }}
-        {% endif %}
-      </h5>
-      {% endif %}
-      {% block body %}{% endblock %}
-    </main>
-    <footer>
-      <small>Source: <a href="https://github.com/pypi/inspector">https://github.com/pypi/inspector</a></small>
+
+      <!-- Page Content -->
+      <div class="content">
+        {% block body %}{% endblock %}
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="site-footer__container">
+        <div class="site-footer__columns">
+          <div class="site-footer__brand">
+            <div class="site-footer__brand-mark">
+              <span class="site-footer__brand-chip">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 2l9 4.9v10.2L12 22l-9-4.9V6.9L12 2z"></path>
+                </svg>
+              </span>
+              PyPI Inspector
+            </div>
+            <p class="site-footer__tagline">
+              A companion tool for inspecting packages on the Python Package
+              Index, maintained by the
+              <a href="https://www.python.org/psf/" rel="noopener" target="_blank">Python Software Foundation</a>.
+            </p>
+            <p class="site-footer__status">
+              <span class="status-dot" aria-hidden="true"></span>
+              <a href="https://status.python.org/" rel="noopener" target="_blank">Status: All Systems Operational</a>
+            </p>
+            <a class="site-footer__button" href="https://pypi.org/sponsor/" rel="noopener" target="_blank">Donate today!</a>
+          </div>
+
+          <div class="site-footer__menu">
+            <h2>Helpful links</h2>
+            <nav aria-label="Helpful links">
+              <ul>
+                <li><a href="https://pypi.org/" rel="noopener" target="_blank">pypi.org</a></li>
+                <li><a href="https://blog.pypi.org/" rel="noopener" target="_blank">PyPI Blog</a></li>
+                <li><a href="https://github.com/pypi/inspector" rel="noopener" target="_blank">Inspector source</a></li>
+                <li><a href="https://pypi.org/security/" rel="noopener" target="_blank">Report security issue</a></li>
+              </ul>
+            </nav>
+          </div>
+
+          <div class="site-footer__menu">
+            <h2>Policies</h2>
+            <nav aria-label="Policies">
+              <ul>
+                <li><a href="https://policies.python.org/pypi.org/Terms-of-Use/" rel="noopener" target="_blank">Terms of Use</a></li>
+                <li><a href="https://policies.python.org/pypi.org/Privacy-Notice/" rel="noopener" target="_blank">Privacy Notice</a></li>
+                <li><a href="https://policies.python.org/pypi.org/Acceptable-Use-Policy/" rel="noopener" target="_blank">Acceptable Use Policy</a></li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+
+        <div class="site-footer__bottom">
+          <p>&copy; Python Software Foundation</p>
+        </div>
+      </div>
     </footer>
+
+    <script>
+      // Progressive enhancement: copy-to-clipboard for buttons carrying either
+      // data-copy-target (id of an element to read textContent from) or
+      // data-copy-text (the literal text to copy).
+      document.addEventListener("click", function (event) {
+        const button = event.target.closest("[data-copy-target], [data-copy-text]");
+        if (!button) return;
+
+        let text = button.dataset.copyText;
+        if (text === undefined) {
+          const source = document.getElementById(button.dataset.copyTarget);
+          if (!source) return;
+          text = source.textContent.trim();
+        }
+
+        navigator.clipboard.writeText(text).then(function () {
+          button.classList.add("is-copied");
+          setTimeout(function () {
+            button.classList.remove("is-copied");
+          }, 1500);
+        });
+      });
+    </script>
+
+    <script>
+      // Progressive enhancement: click-to-sort for .data-table--sortable columns.
+      document.querySelectorAll(".data-table--sortable").forEach(function (table) {
+        const headers = Array.from(table.querySelectorAll("th[data-sort]"));
+        const tbody = table.tBodies[0];
+
+        headers.forEach(function (header, columnIndex) {
+          header.addEventListener("click", function () {
+            const ascending = header.getAttribute("aria-sort") !== "ascending";
+            const type = header.dataset.sort;
+            const rows = Array.from(tbody.rows);
+
+            rows.sort(function (a, b) {
+              const cellA = a.cells[columnIndex].dataset.sortValue || "";
+              const cellB = b.cells[columnIndex].dataset.sortValue || "";
+              const valueA = type === "text" ? cellA : parseFloat(cellA) || 0;
+              const valueB = type === "text" ? cellB : parseFloat(cellB) || 0;
+              if (valueA < valueB) return ascending ? -1 : 1;
+              if (valueA > valueB) return ascending ? 1 : -1;
+              return 0;
+            });
+
+            headers.forEach(function (h) { h.removeAttribute("aria-sort"); });
+            header.setAttribute("aria-sort", ascending ? "ascending" : "descending");
+            rows.forEach(function (row) { tbody.appendChild(row); });
+          });
+        });
+      });
+    </script>
+
+    <script>
+      // Progressive enhancement: expand/collapse a capped [data-expandable] container.
+      document.querySelectorAll("[data-expand-toggle]").forEach(function (button) {
+        const container = button.closest("[data-expandable]");
+        if (!container) return;
+        const collapsedLabel = button.textContent;
+
+        button.addEventListener("click", function () {
+          const expanded = container.classList.toggle("is-expanded");
+          button.textContent = expanded ? "Show less" : collapsedLabel;
+        });
+      });
+    </script>
+
+    <script>
+      // Progressive enhancement: filter a [data-table-filter-scope]'s table
+      // rows by text match. Hidden until JS confirms it actually works.
+      document.querySelectorAll("[data-table-filter-scope]").forEach(function (scope) {
+        const filter = scope.querySelector("[data-table-filter]");
+        const input = scope.querySelector("[data-table-filter-input]");
+        const count = scope.querySelector("[data-table-filter-count]");
+        const rows = Array.from(scope.querySelectorAll("tbody tr"));
+        if (!filter || !input || !rows.length) return;
+
+        filter.hidden = false;
+        const total = rows.length;
+
+        const update = function () {
+          const query = input.value.trim().toLowerCase();
+          let shown = 0;
+          rows.forEach(function (row) {
+            const match = !query || row.textContent.toLowerCase().includes(query);
+            row.hidden = !match;
+            if (match) shown++;
+          });
+          count.textContent = query ? shown + " of " + total : total + " versions";
+        };
+
+        input.addEventListener("input", update);
+        update();
+      });
+    </script>
   </body>
 </html>

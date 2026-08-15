@@ -1,45 +1,213 @@
 {% extends 'base.html' %}
 
-{% block head %}
-  <link rel="stylesheet" type="text/css" href="/static/style.css">
-{% endblock %}
+{% macro dependency_item(dep) %}
+<li>
+  {% if dep.name %}
+    <a href="/project/{{ dep.name }}/"><code>{{ dep.raw }}</code></a>
+  {% else %}
+    <code>{{ dep.raw }}</code>
+  {% endif %}
+</li>
+{% endmacro %}
 
 {% block body %}
-{% if releases|length != 1 %}
-  <p>Retrieved {{ releases|length }} versions.</p>
-{% else %}
-  <p>Retrieved 1 version.</p>
+{% if project_status == "archived" %}
+<div class="status-banner status-banner--archived">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 01-2-2V4a2 2 0 012-2h14a2 2 0 012 2v2a2 2 0 01-2 2M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+  </svg>
+  <div>
+    <strong>Archived</strong>
+    <p>This project has been archived by its maintainers and is no longer receiving updates.</p>
+  </div>
+</div>
 {% endif %}
-
-<table>
-<colgroup>
-  <col style="width: 160px">
-  <col style="width: 160px">
-  <col style="width: 160px">
-</colgroup>
-<thead>
-<tr>
-  <th>Version</th>
-  <th>Upload Timestamp</th>
-  <th>Artifacts</th>
-</tr>
-</thead>
-{% for key, value in releases.items() %}
-  <tr>
-  {% if value|length > 0 %}
-    <td><a href="./{{ key }}">{{ key }}</a></td>
-    <td>{{ value[0]['upload_time'] }}</td>
-    <td>{{ value|length }}</td>
-  {% else %}
-    <td>{{ key }}</td>
-    <td><span class="no-entries"><i>Not Available</i></span></td>
-    <td><span class="no-entries"><i>Not Available</i></span></td>
+<div class="project-banner">
+  <h1>{{ h2 }}{% if latest_version %} <span class="version">{{ latest_version }}</span>{% endif %}</h1>
+  {% if summary %}
+    <p>{{ summary }}</p>
   {% endif %}
-  </tr>
-{% endfor %}
-<tbody>
-</tbody>
+  <div class="pip-install">
+    <code id="pip-install-cmd">pip install {{ h2 }}</code>
+    <button type="button" class="pip-install__copy copy-btn" data-copy-target="pip-install-cmd" aria-label="Copy command">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <rect x="9" y="9" width="12" height="12" rx="2"></rect>
+        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+      </svg>
+    </button>
+  </div>
+</div>
 
-</table>
+{% with vuln_scope = "in " ~ latest_version %}
+  {% include "_vulnerabilities.html" %}
+{% endwith %}
 
+<div class="layout">
+  <div class="layout__main">
+    <div class="tabs">
+      <span class="tab is-active">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+        </svg>
+        Release history
+      </span>
+    </div>
+
+    <div {% if releases|length > 15 %}data-table-filter-scope{% endif %}>
+    {% if releases|length > 15 %}
+    <div class="table-filter" data-table-filter hidden>
+      <input type="search" placeholder="Filter versions…" aria-label="Filter versions" data-table-filter-input>
+      <span class="table-filter__count" data-table-filter-count></span>
+    </div>
+    {% endif %}
+
+    <div class="expandable" {% if releases|length > 15 %}data-expandable{% endif %}>
+    <div class="table-scroll {% if releases|length > 15 %}table-scroll--capped{% endif %}">
+      <table class="data-table data-table--sortable">
+        <thead>
+          <tr>
+            <th scope="col" data-sort="rank" aria-sort="ascending">Version</th>
+            <th scope="col" data-sort="text">Uploaded</th>
+            <th scope="col" data-sort="number">Artifacts</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for key, value in releases.items() %}
+          {% set status = release_status.get(key, {}) %}
+          <tr>
+            {% if value|length > 0 %}
+              <td data-sort-value="{{ loop.index }}">
+                <div class="version-cell">
+                  <a href="./{{ key }}" {% if status.yanked %}class="is-yanked"{% endif %}>{{ key }}</a>
+                  <button type="button" class="version-cell__copy copy-btn"
+                          data-copy-text="pip install {{ h2 }}=={{ key }}"
+                          aria-label="Copy pip install command for {{ key }}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <rect x="9" y="9" width="12" height="12" rx="2"></rect>
+                      <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+              <td class="text-muted" data-sort-value="{{ value[0]['upload_time'] }}">{{ value[0]['upload_time'] }}</td>
+              <td data-sort-value="{{ value|length }}">
+                <span class="pill pill--success">
+                  {{ value|length }} artifact{% if value|length != 1 %}s{% endif %}
+                </span>
+              </td>
+            {% else %}
+              <td class="text-muted" data-sort-value="{{ loop.index }}">{{ key }}</td>
+              <td data-sort-value=""><span class="text-muted">Not available</span></td>
+              <td data-sort-value="0"><span class="pill pill--neutral">N/A</span></td>
+            {% endif %}
+            <td>
+              {% if status.yanked %}
+                <span class="pill pill--yanked" {% if status.yanked_reason %}title="{{ status.yanked_reason }}"{% endif %}>Yanked</span>
+              {% elif key == latest_version %}
+                <span class="pill pill--latest">Latest</span>
+              {% elif status.prerelease %}
+                <span class="pill pill--prerelease">Pre-release</span>
+              {% else %}
+                <span class="text-muted">&mdash;</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if releases|length > 15 %}
+    <button type="button" class="expand-toggle" data-expand-toggle>Show all {{ releases|length }} versions</button>
+    {% endif %}
+    </div>
+    </div>
+  </div>
+
+  <aside class="layout__aside">
+    {% if project_links %}
+    <div class="panel">
+      <h2 class="panel__title">Project links</h2>
+      <ul class="link-list">
+        {% for label, url in project_links.items() %}
+        <li>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+          </svg>
+          <a href="{{ url }}" rel="noopener" target="_blank">{{ label }}</a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <div class="panel">
+      <h2 class="panel__title">Details</h2>
+      <dl>
+        {% if latest_version %}
+        <div class="field">
+          <dt>Latest release</dt>
+          <dd>{{ latest_version }}</dd>
+        </div>
+        {% endif %}
+        <div class="field">
+          <dt>Versions</dt>
+          <dd>{{ releases|length }}</dd>
+        </div>
+        {% if author %}
+        <div class="field">
+          <dt>Author</dt>
+          <dd>{{ author }}</dd>
+        </div>
+        {% endif %}
+        {% if license %}
+        <div class="field">
+          <dt>License</dt>
+          <dd>{{ license }}</dd>
+        </div>
+        {% endif %}
+        {% if development_status %}
+        <div class="field">
+          <dt>Status</dt>
+          <dd>{{ development_status }}</dd>
+        </div>
+        {% endif %}
+        {% if requires_python %}
+        <div class="field">
+          <dt>Requires Python</dt>
+          <dd><code>{{ requires_python }}</code></dd>
+        </div>
+        {% endif %}
+      </dl>
+      {% if python_versions %}
+      <div class="chip-row">
+        {% for version in python_versions %}
+        <span class="pill pill--neutral">Python {{ version }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    {% if dependencies %}
+    <div class="panel">
+      <h2 class="panel__title">Dependencies</h2>
+      <ul class="dependency-list">
+        {% for dep in dependencies[:10] %}
+          {{ dependency_item(dep) }}
+        {% endfor %}
+      </ul>
+      {% if dependencies|length > 10 %}
+      <details class="disclosure">
+        <summary>Show all {{ dependencies|length }}</summary>
+        <ul class="dependency-list">
+          {% for dep in dependencies[10:] %}
+            {{ dependency_item(dep) }}
+          {% endfor %}
+        </ul>
+      </details>
+      {% endif %}
+    </div>
+    {% endif %}
+  </aside>
+</div>
 {% endblock %}

@@ -90,7 +90,7 @@ def test_versions(monkeypatch):
         status_code=200,
         json=lambda: stub_json,
     )
-    get = pretend.call_recorder(lambda a: stub_response)
+    get = pretend.call_recorder(lambda *a, **kw: stub_response)
     monkeypatch.setattr(
         inspector.main, "requests_session", lambda: pretend.stub(get=get)
     )
@@ -100,11 +100,40 @@ def test_versions(monkeypatch):
 
     inspector.main.versions("foo")
 
-    assert get.calls == [pretend.call("https://pypi.org/pypi/foo/json")]
+    # The JSON and Simple API requests run concurrently, so their relative
+    # order isn't guaranteed -- check membership rather than an ordered list.
+    assert len(get.calls) == 2
+    assert pretend.call("https://pypi.org/pypi/foo/json") in get.calls
+    assert (
+        pretend.call(
+            "https://pypi.org/simple/foo/",
+            headers={"Accept": "application/vnd.pypi.simple.v1+json"},
+            timeout=5,
+        )
+        in get.calls
+    )
     assert render_template.calls == [
         pretend.call(
             "releases.html",
             releases={"0.5.1e": None},
+            release_status={
+                "0.5.1e": {
+                    "yanked": False,
+                    "yanked_reason": None,
+                    "prerelease": False,
+                }
+            },
+            project_status=None,
+            latest_version=None,
+            summary=None,
+            author=None,
+            license=None,
+            project_links={},
+            vulnerabilities=[],
+            requires_python=None,
+            development_status=None,
+            python_versions=[],
+            dependencies=[],
             h2="foo",
             h2_link="/project/foo",
             h2_paren="View this project on PyPI",
