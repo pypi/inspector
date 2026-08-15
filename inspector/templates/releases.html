@@ -33,12 +33,12 @@
     </div>
 
     <div class="table-scroll">
-      <table class="data-table">
+      <table class="data-table data-table--sortable">
         <thead>
           <tr>
-            <th scope="col">Version</th>
-            <th scope="col">Uploaded</th>
-            <th scope="col">Artifacts</th>
+            <th scope="col" data-sort="rank" aria-sort="ascending">Version</th>
+            <th scope="col" data-sort="text">Uploaded</th>
+            <th scope="col" data-sort="number">Artifacts</th>
             <th scope="col">Status</th>
           </tr>
         </thead>
@@ -47,19 +47,19 @@
           {% set status = release_status.get(key, {}) %}
           <tr>
             {% if value|length > 0 %}
-              <td>
+              <td data-sort-value="{{ loop.index }}">
                 <a href="./{{ key }}" {% if status.yanked %}class="is-yanked"{% endif %}>{{ key }}</a>
               </td>
-              <td class="text-muted">{{ value[0]['upload_time'] }}</td>
-              <td>
+              <td class="text-muted" data-sort-value="{{ value[0]['upload_time'] }}">{{ value[0]['upload_time'] }}</td>
+              <td data-sort-value="{{ value|length }}">
                 <span class="pill pill--success">
                   {{ value|length }} artifact{% if value|length != 1 %}s{% endif %}
                 </span>
               </td>
             {% else %}
-              <td class="text-muted">{{ key }}</td>
-              <td><span class="text-muted">Not available</span></td>
-              <td><span class="pill pill--neutral">N/A</span></td>
+              <td class="text-muted" data-sort-value="{{ loop.index }}">{{ key }}</td>
+              <td data-sort-value=""><span class="text-muted">Not available</span></td>
+              <td data-sort-value="0"><span class="pill pill--neutral">N/A</span></td>
             {% endif %}
             <td>
               {% if status.yanked %}

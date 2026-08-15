@@ -600,6 +600,35 @@ table.data-table {
   color: var(--grey-mid);
 }
 
+.data-table--sortable th[data-sort] {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.data-table--sortable th[data-sort]:hover {
+  color: var(--primary);
+}
+
+.data-table--sortable th[data-sort]::after {
+  content: "\2195";
+  display: inline-block;
+  margin-left: 5px;
+  opacity: 0.4;
+}
+
+.data-table--sortable th[data-sort][aria-sort="ascending"]::after {
+  content: "\2191";
+  opacity: 1;
+  color: var(--primary);
+}
+
+.data-table--sortable th[data-sort][aria-sort="descending"]::after {
+  content: "\2193";
+  opacity: 1;
+  color: var(--primary);
+}
+
 .data-table tbody tr:hover {
   background: var(--row-hover);
 }

@@ -165,5 +165,35 @@
         });
       });
     </script>
+
+    <script>
+      // Progressive enhancement: click-to-sort for .data-table--sortable columns.
+      document.querySelectorAll(".data-table--sortable").forEach(function (table) {
+        const headers = Array.from(table.querySelectorAll("th[data-sort]"));
+        const tbody = table.tBodies[0];
+
+        headers.forEach(function (header, columnIndex) {
+          header.addEventListener("click", function () {
+            const ascending = header.getAttribute("aria-sort") !== "ascending";
+            const type = header.dataset.sort;
+            const rows = Array.from(tbody.rows);
+
+            rows.sort(function (a, b) {
+              const cellA = a.cells[columnIndex].dataset.sortValue || "";
+              const cellB = b.cells[columnIndex].dataset.sortValue || "";
+              const valueA = type === "text" ? cellA : parseFloat(cellA) || 0;
+              const valueB = type === "text" ? cellB : parseFloat(cellB) || 0;
+              if (valueA < valueB) return ascending ? -1 : 1;
+              if (valueA > valueB) return ascending ? 1 : -1;
+              return 0;
+            });
+
+            headers.forEach(function (h) { h.removeAttribute("aria-sort"); });
+            header.setAttribute("aria-sort", ascending ? "ascending" : "descending");
+            rows.forEach(function (row) { tbody.appendChild(row); });
+          });
+        });
+      });
+    </script>
   </body>
 </html>
