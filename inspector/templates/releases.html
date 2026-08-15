@@ -1,74 +1,124 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<div class="space-y-6">
-  <!-- Summary Card -->
-  <div class="bg-gradient-to-r from-python-blue to-python-blue-dark text-white rounded-lg p-6 shadow-lg">
-    <div class="flex items-center justify-between">
-      <div>
-        <h2 class="text-2xl font-bold mb-2">Package Releases</h2>
-        {% if releases|length != 1 %}
-          <p class="text-lg opacity-90">Retrieved {{ releases|length }} versions</p>
-        {% else %}
-          <p class="text-lg opacity-90">Retrieved 1 version</p>
-        {% endif %}
-      </div>
-      <svg class="w-16 h-16 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+<div class="project-banner">
+  <h1>{{ h2 }}{% if latest_version %} <span class="version">{{ latest_version }}</span>{% endif %}</h1>
+  {% if summary %}
+    <p>{{ summary }}</p>
+  {% endif %}
+  <div class="pip-install">
+    <code id="pip-install-cmd">pip install {{ h2 }}</code>
+    <button type="button" class="pip-install__copy" data-copy-target="pip-install-cmd" aria-label="Copy command">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <rect x="9" y="9" width="12" height="12" rx="2"></rect>
+        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
       </svg>
+    </button>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="layout__main">
+    <div class="tabs">
+      <span class="tab is-active">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+        </svg>
+        Release history
+      </span>
+    </div>
+
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">Version</th>
+            <th scope="col">Uploaded</th>
+            <th scope="col">Artifacts</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for key, value in releases.items() %}
+          {% set status = release_status.get(key, {}) %}
+          <tr>
+            {% if value|length > 0 %}
+              <td>
+                <a href="./{{ key }}" {% if status.yanked %}class="is-yanked"{% endif %}>{{ key }}</a>
+              </td>
+              <td class="text-muted">{{ value[0]['upload_time'] }}</td>
+              <td>
+                <span class="pill pill--success">
+                  {{ value|length }} artifact{% if value|length != 1 %}s{% endif %}
+                </span>
+              </td>
+            {% else %}
+              <td class="text-muted">{{ key }}</td>
+              <td><span class="text-muted">Not available</span></td>
+              <td><span class="pill pill--neutral">N/A</span></td>
+            {% endif %}
+            <td>
+              {% if status.yanked %}
+                <span class="pill pill--yanked" {% if status.yanked_reason %}title="{{ status.yanked_reason }}"{% endif %}>Yanked</span>
+              {% elif key == latest_version %}
+                <span class="pill pill--latest">Latest</span>
+              {% elif status.prerelease %}
+                <span class="pill pill--prerelease">Pre-release</span>
+              {% else %}
+                <span class="text-muted">&mdash;</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <!-- Releases Table -->
-  <div class="overflow-hidden shadow-lg rounded-lg border border-gray-200">
-    <table class="min-w-full divide-y divide-gray-200">
-      <thead class="bg-python-blue text-white">
-        <tr>
-          <th scope="col" class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
-            Version
-          </th>
-          <th scope="col" class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
-            Upload Timestamp
-          </th>
-          <th scope="col" class="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
-            Artifacts
-          </th>
-        </tr>
-      </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
-        {% for key, value in releases.items() %}
-        <tr class="hover:bg-gray-50 transition-colors duration-150">
-          {% if value|length > 0 %}
-            <td class="px-6 py-4 whitespace-nowrap">
-              <a href="./{{ key }}" class="text-python-blue hover:text-python-blue-dark font-semibold transition-colors duration-200">
-                {{ key }}
-              </a>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-              {{ value[0]['upload_time'] }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                {{ value|length }} artifact{% if value|length != 1 %}s{% endif %}
-              </span>
-            </td>
-          {% else %}
-            <td class="px-6 py-4 whitespace-nowrap text-gray-500">
-              {{ key }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="text-gray-400 italic text-sm">Not Available</span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
-                N/A
-              </span>
-            </td>
-          {% endif %}
-        </tr>
+  <aside class="layout__aside">
+    {% if project_links %}
+    <div class="panel">
+      <h2 class="panel__title">Project links</h2>
+      <ul class="link-list">
+        {% for label, url in project_links.items() %}
+        <li>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+          </svg>
+          <a href="{{ url }}" rel="noopener" target="_blank">{{ label }}</a>
+        </li>
         {% endfor %}
-      </tbody>
-    </table>
-  </div>
+      </ul>
+    </div>
+    {% endif %}
+
+    <div class="panel">
+      <h2 class="panel__title">Details</h2>
+      <dl>
+        {% if latest_version %}
+        <div class="field">
+          <dt>Latest release</dt>
+          <dd>{{ latest_version }}</dd>
+        </div>
+        {% endif %}
+        <div class="field">
+          <dt>Versions</dt>
+          <dd>{{ releases|length }}</dd>
+        </div>
+        {% if author %}
+        <div class="field">
+          <dt>Author</dt>
+          <dd>{{ author }}</dd>
+        </div>
+        {% endif %}
+        {% if license %}
+        <div class="field">
+          <dt>License</dt>
+          <dd>{{ license }}</dd>
+        </div>
+        {% endif %}
+      </dl>
+    </div>
+  </aside>
 </div>
 {% endblock %}

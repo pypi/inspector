@@ -5,156 +5,165 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PyPI Inspector</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>P</text></svg>">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              'python-blue': '#3776AB',
-              'python-yellow': '#FFD43B',
-              'python-blue-dark': '#2D5E8B',
-              'python-blue-light': '#4E8DC8',
-              'python-yellow-dark': '#FFCA00',
-              'python-yellow-light': '#FFE57F',
-            }
-          }
-        }
-      }
-    </script>
-    <style>
-      .header-gradient {
-        background: linear-gradient(135deg, #3776AB 0%, #2D5E8B 50%, #3776AB 100%);
-      }
-    </style>
+    <link rel="stylesheet" href="/static/fonts/source-sans-3/source-sans-3.css">
+    <link rel="stylesheet" href="/static/pypi.css">
     {% block head %}{% endblock %}
   </head>
-  <body class="min-h-screen bg-gray-50 flex flex-col">
+  <body>
     <!-- Header -->
-    <header class="header-gradient shadow-lg">
-      <div class="container mx-auto px-4 py-6">
-        <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-          <h1 class="text-3xl font-bold text-white flex items-center space-x-2">
-            <a href="/" class="hover:text-python-yellow transition-colors duration-200">PyPI Inspector</a>
-          </h1>
-          
-          <!-- Search Form -->
-          <form action="/" method="get" class="w-full md:w-auto">
-            <div class="flex space-x-2">
-              {% if h2 %}
-                <input type="text" name="project" placeholder="Enter project name..." 
-                       value="{{ h2 }}" autocomplete="off"
-                       class="px-4 py-2 rounded-lg border-2 border-white/20 bg-white/10 text-white placeholder-white/70 focus:outline-none focus:border-python-yellow focus:bg-white focus:text-gray-900 transition-all duration-200 w-64">
-              {% else %}
-                <input type="text" name="project" placeholder="Enter project name..." 
-                       autocomplete="off"
-                       class="px-4 py-2 rounded-lg border-2 border-white/20 bg-white/10 text-white placeholder-white/70 focus:outline-none focus:border-python-yellow focus:bg-white focus:text-gray-900 transition-all duration-200 w-64">
-              {% endif %}
-              <button type="submit" 
-                      class="bg-python-yellow hover:bg-python-yellow-dark text-gray-900 font-semibold py-2 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
-                Search
-              </button>
-            </div>
-          </form>
-        </div>
+    <header class="site-header">
+      <div class="site-header__container">
+        <a href="/" class="site-header__brand">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2l9 4.9v10.2L12 22l-9-4.9V6.9L12 2z"></path>
+          </svg>
+          PyPI Inspector
+        </a>
+
+        <form action="/" method="get" class="site-header__search">
+          <div class="search-field">
+            <input type="text" name="project" placeholder="Search projects…"
+                   value="{{ h2 or '' }}" autocomplete="off">
+            <button type="submit" aria-label="Search">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </button>
+          </div>
+        </form>
       </div>
     </header>
 
+    <!-- Full-bleed content (e.g. homepage hero) -->
+    {% block above_body %}{% endblock %}
+
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8 flex-1">
-      {% block above_body %}{% endblock %}
-      
+    <div class="shell">
       <!-- Breadcrumb Navigation -->
       {% if h2 or h3 or h4 or h5 %}
-      <nav class="mb-6">
-        <ol class="flex flex-wrap items-center space-x-2 text-sm">
-          <li><a href="/" class="text-python-blue hover:text-python-blue-dark transition-colors">Home</a></li>
-          
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="/">Home</a></li>
+
           {% if h2 %}
-          <li class="flex items-center">
-            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-            <span class="font-semibold text-gray-700">
-              {% if h2_link %}
-                <a href="{{ h2_link }}" class="text-python-blue hover:text-python-blue-dark transition-colors">{{ h2 }}</a>
-              {% else %}
-                {{ h2 }}
-              {% endif %}
-              {% if h2_paren_link %}
-                (<a href="{{ h2_paren_link }}" class="text-python-blue hover:text-python-blue-dark transition-colors">{{ h2_paren }}</a>)
-              {% endif %}
-            </span>
+          <li>
+            {% if h2_link %}
+              <a href="{{ h2_link }}">{{ h2 }}</a>
+            {% else %}
+              <span class="current">{{ h2 }}</span>
+            {% endif %}
+            {% if h2_paren_link %}
+              (<a href="{{ h2_paren_link }}">{{ h2_paren }}</a>)
+            {% endif %}
           </li>
           {% endif %}
-          
+
           {% if h3 %}
-          <li class="flex items-center">
-            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-            <span class="text-gray-600">
-              {% if h3_link %}
-                <a href="{{ h3_link }}" class="text-python-blue hover:text-python-blue-dark transition-colors">{{ h3 }}</a>
-              {% else %}
-                {{ h3 }}
-              {% endif %}
-              {% if h3_paren_link %}
-                (<a href="{{ h3_paren_link }}" class="text-python-blue hover:text-python-blue-dark transition-colors">{{ h3_paren }}</a>)
-              {% endif %}
-            </span>
+          <li>
+            {% if h3_link %}
+              <a href="{{ h3_link }}">{{ h3 }}</a>
+            {% else %}
+              <span class="current">{{ h3 }}</span>
+            {% endif %}
+            {% if h3_paren_link %}
+              (<a href="{{ h3_paren_link }}">{{ h3_paren }}</a>)
+            {% endif %}
           </li>
           {% endif %}
-          
+
           {% if h4 %}
-          <li class="flex items-center">
-            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-            <span class="text-gray-600">
-              {% if h4_link %}
-                <a href="{{ h4_link }}" class="text-python-blue hover:text-python-blue-dark transition-colors">{{ h4 }}</a>
-              {% else %}
-                {{ h4 }}
-              {% endif %}
-            </span>
+          <li>
+            {% if h4_link %}
+              <a href="{{ h4_link }}">{{ h4 }}</a>
+            {% else %}
+              <span class="current">{{ h4 }}</span>
+            {% endif %}
           </li>
           {% endif %}
-          
+
           {% if h5 %}
-          <li class="flex items-center">
-            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-            <span class="text-gray-600">
-              {% if h5_link %}
-                <a href="{{ h5_link }}" class="text-python-blue hover:text-python-blue-dark transition-colors">{{ h5 }}</a>
-              {% else %}
-                {{ h5 }}
-              {% endif %}
-            </span>
-          </li>
+          <li><span class="current">{{ h5 }}</span></li>
           {% endif %}
         </ol>
       </nav>
       {% endif %}
-      
+
       <!-- Page Content -->
-      <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="content">
         {% block body %}{% endblock %}
       </div>
-    </main>
+    </div>
 
     <!-- Footer -->
-    <footer class="mt-auto py-8 bg-gray-100 border-t border-gray-200">
-      <div class="container mx-auto px-4 text-center">
-        <p class="text-gray-600 text-sm">
-          Source: <a href="https://github.com/pypi/inspector" 
-                     class="text-python-blue hover:text-python-blue-dark transition-colors">
-            github.com/pypi/inspector
-          </a>
-        </p>
+    <footer class="site-footer">
+      <div class="site-footer__container">
+        <div class="site-footer__columns">
+          <div class="site-footer__brand">
+            <div class="site-footer__brand-mark">
+              <span class="site-footer__brand-chip">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 2l9 4.9v10.2L12 22l-9-4.9V6.9L12 2z"></path>
+                </svg>
+              </span>
+              PyPI Inspector
+            </div>
+            <p class="site-footer__tagline">
+              A companion tool for inspecting packages on the Python Package
+              Index, maintained by the
+              <a href="https://www.python.org/psf/" rel="noopener" target="_blank">Python Software Foundation</a>.
+            </p>
+            <p class="site-footer__status">
+              <span class="status-dot" aria-hidden="true"></span>
+              <a href="https://status.python.org/" rel="noopener" target="_blank">Status: All Systems Operational</a>
+            </p>
+            <a class="site-footer__button" href="https://pypi.org/sponsor/" rel="noopener" target="_blank">Donate today!</a>
+          </div>
+
+          <div class="site-footer__menu">
+            <h2>Helpful links</h2>
+            <nav aria-label="Helpful links">
+              <ul>
+                <li><a href="https://pypi.org/" rel="noopener" target="_blank">pypi.org</a></li>
+                <li><a href="https://blog.pypi.org/" rel="noopener" target="_blank">PyPI Blog</a></li>
+                <li><a href="https://github.com/pypi/inspector" rel="noopener" target="_blank">Inspector source</a></li>
+                <li><a href="https://pypi.org/security/" rel="noopener" target="_blank">Report security issue</a></li>
+              </ul>
+            </nav>
+          </div>
+
+          <div class="site-footer__menu">
+            <h2>Policies</h2>
+            <nav aria-label="Policies">
+              <ul>
+                <li><a href="https://policies.python.org/pypi.org/Terms-of-Use/" rel="noopener" target="_blank">Terms of Use</a></li>
+                <li><a href="https://policies.python.org/pypi.org/Privacy-Notice/" rel="noopener" target="_blank">Privacy Notice</a></li>
+                <li><a href="https://policies.python.org/pypi.org/Acceptable-Use-Policy/" rel="noopener" target="_blank">Acceptable Use Policy</a></li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+
+        <div class="site-footer__bottom">
+          <p>&copy; Python Software Foundation</p>
+        </div>
       </div>
     </footer>
+
+    <script>
+      // Progressive enhancement: copy-to-clipboard for [data-copy-target] buttons.
+      document.addEventListener("click", function (event) {
+        const button = event.target.closest("[data-copy-target]");
+        if (!button) return;
+        const source = document.getElementById(button.dataset.copyTarget);
+        if (!source) return;
+
+        navigator.clipboard.writeText(source.textContent.trim()).then(function () {
+          button.classList.add("is-copied");
+          setTimeout(function () {
+            button.classList.remove("is-copied");
+          }, 1500);
+        });
+      });
+    </script>
   </body>
 </html>

@@ -197,15 +197,38 @@ def versions(project_name):
     if resp.status_code != 200:
         return redirect(pypi_project_url, 307)
 
-    releases = resp.json()["releases"]
+    data = resp.json()
+    releases = data["releases"]
     sorted_releases = {
         version: releases[version]
         for version in sorted(releases.keys(), key=parse, reverse=True)
     }
 
+    info = data.get("info") or {}
+    project_links = dict(info.get("project_urls") or {})
+    if info.get("home_page") and "Homepage" not in project_links:
+        project_links["Homepage"] = info["home_page"]
+
+    release_status = {}
+    for version, files in sorted_releases.items():
+        yanked_reason = next(
+            (f["yanked_reason"] for f in files if f.get("yanked")), None
+        )
+        release_status[version] = {
+            "yanked": any(f.get("yanked") for f in files),
+            "yanked_reason": yanked_reason,
+            "prerelease": parse(version).is_prerelease,
+        }
+
     return render_template(
         "releases.html",
         releases=sorted_releases,
+        release_status=release_status,
+        latest_version=info.get("version"),
+        summary=info.get("summary"),
+        author=info.get("author") or info.get("maintainer"),
+        license=info.get("license"),
+        project_links=project_links,
         h2=project_name,
         h2_link=f"/project/{project_name}",
         h2_paren="View this project on PyPI",
