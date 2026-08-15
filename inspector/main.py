@@ -1,3 +1,4 @@
+import concurrent.futures
 import os
 import urllib.parse
 
@@ -257,15 +258,26 @@ def versions(project_name):
             url_for("versions", project_name=canonicalize_name(project_name)), 301
         )
 
-    resp = requests_session().get(f"https://pypi.org/pypi/{project_name}/json")
     pypi_project_url = f"https://pypi.org/project/{project_name}"
+
+    # Fetch the legacy JSON API and the Simple API's PEP 792 status
+    # concurrently -- they're independent requests to the same host, and
+    # running them in series would add the Simple API's latency to every
+    # single project page load for no reason.
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        json_future = executor.submit(
+            requests_session().get, f"https://pypi.org/pypi/{project_name}/json"
+        )
+        status_future = executor.submit(_get_project_status, project_name)
+        resp = json_future.result()
+        project_status = status_future.result()
 
     # The legacy JSON API hides quarantined projects entirely (so installers
     # won't touch them), unlike the Simple API's PEP 792 status marker, which
     # is the public, intended way to surface this. Check it before assuming
     # a 404 means "never existed".
     if resp.status_code == 404:
-        if _get_project_status(project_name) == "quarantined":
+        if project_status == "quarantined":
             return render_template(
                 "quarantined.html",
                 h2=project_name,
@@ -302,8 +314,6 @@ def versions(project_name):
             "yanked_reason": yanked_reason,
             "prerelease": parse(version).is_prerelease,
         }
-
-    project_status = _get_project_status(project_name)
 
     return render_template(
         "releases.html",
