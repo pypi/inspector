@@ -7,6 +7,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>P</text></svg>">
     <link rel="stylesheet" href="/static/fonts/source-sans-3/source-sans-3.css">
     <link rel="stylesheet" href="/static/pypi.css">
+    <script src="/static/inspector.js" defer></script>
     {% block head %}{% endblock %}
   </head>
   <body>
@@ -22,7 +23,7 @@
 
         <form action="/" method="get" class="site-header__search">
           <div class="search-field">
-            <input type="text" name="project" placeholder="Search projects…"
+            <input id="project-input" type="text" name="project" placeholder="Search projects…"
                    value="{{ h2 or '' }}" autocomplete="off">
             <button type="submit" aria-label="Search">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
