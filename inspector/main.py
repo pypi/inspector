@@ -1,5 +1,6 @@
 import concurrent.futures
 import os
+import re
 import urllib.parse
 
 import gunicorn.http.errors
@@ -27,6 +28,23 @@ PACKAGE_TYPE_LABELS = {
     "bdist_dmg": "DMG",
     "bdist_wininst": "Windows Installer",
 }
+
+
+def _plain_text_preview(markdown_text):
+    """OSV/PySEC 'details' text is markdown (headings, emphasis) -- we
+    deliberately don't render it as HTML since it's untrusted third-party
+    content, but printing it raw shows literal "###" and "**" to the reader.
+    Strip the common markers for a clean plain-text preview instead."""
+    if not markdown_text:
+        return markdown_text
+    lines = [
+        line
+        for line in markdown_text.splitlines()
+        if not re.match(r"^\s{0,3}#{1,6}\s", line)
+    ]
+    text = " ".join(line.strip() for line in lines if line.strip())
+    text = re.sub(r"[*_`]{1,3}", "", text)
+    return text
 
 
 def _human_size(num_bytes):
@@ -234,6 +252,7 @@ app = Flask(__name__)
 
 app.jinja_env.filters["unquote"] = lambda u: urllib.parse.unquote(u)
 app.jinja_env.filters["filesizeformat"] = _human_size
+app.jinja_env.filters["plain_text_preview"] = _plain_text_preview
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
 

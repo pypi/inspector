@@ -5,7 +5,7 @@
     {% for vuln in vulnerabilities[:5] %}
     <li>
       <a class="vuln-id" href="{{ vuln.link }}" rel="noopener" target="_blank">{{ vuln.id }}</a>
-      {% if vuln.details %}<p>{{ vuln.details|truncate(220) }}</p>{% endif %}
+      {% if vuln.details %}<p>{{ vuln.details|plain_text_preview|truncate(220) }}</p>{% endif %}
       {% if vuln.fixed_in %}<p class="vuln-fixed">Fixed in: {{ vuln.fixed_in|join(', ') }}</p>{% endif %}
     </li>
     {% endfor %}
@@ -17,7 +17,7 @@
       {% for vuln in vulnerabilities[5:] %}
       <li>
         <a class="vuln-id" href="{{ vuln.link }}" rel="noopener" target="_blank">{{ vuln.id }}</a>
-        {% if vuln.details %}<p>{{ vuln.details|truncate(220) }}</p>{% endif %}
+        {% if vuln.details %}<p>{{ vuln.details|plain_text_preview|truncate(220) }}</p>{% endif %}
         {% if vuln.fixed_in %}<p class="vuln-fixed">Fixed in: {{ vuln.fixed_in|join(', ') }}</p>{% endif %}
       </li>
       {% endfor %}
