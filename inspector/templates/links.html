@@ -10,6 +10,51 @@
   {% include "_vulnerabilities.html" %}
 {% endwith %}
 
+{% if files %}
+<div class="table-scroll">
+  <table class="data-table data-table--sortable">
+    <thead>
+      <tr>
+        <th scope="col" data-sort="text">Filename</th>
+        <th scope="col" data-sort="text">Type</th>
+        <th scope="col" data-sort="text">Python</th>
+        <th scope="col" data-sort="number">Size</th>
+        <th scope="col" data-sort="text" aria-sort="descending">Uploaded</th>
+        <th scope="col">SHA256</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for file in files %}
+      <tr>
+        <td data-sort-value="{{ file.filename }}">
+          <a href="{{ file.path }}" {% if file.yanked %}class="is-yanked"{% endif %}>{{ file.filename }}</a>
+          {% if file.yanked %}
+            <div><span class="pill pill--yanked" {% if file.yanked_reason %}title="{{ file.yanked_reason }}"{% endif %}>Yanked</span></div>
+          {% endif %}
+        </td>
+        <td data-sort-value="{{ file.packagetype }}" class="text-muted">{{ file.packagetype }}</td>
+        <td data-sort-value="{{ file.python_version }}" class="text-muted">{{ file.python_version }}</td>
+        <td data-sort-value="{{ file.size or 0 }}" class="text-muted">{{ file.size|filesizeformat }}</td>
+        <td data-sort-value="{{ file.upload_time }}" class="text-muted">{{ file.upload_time }}</td>
+        <td>
+          {% if file.sha256 %}
+          <div class="hash-cell">
+            <code id="sha256-{{ loop.index }}">{{ file.sha256 }}</code>
+            <button type="button" class="hash-cell__copy" data-copy-target="sha256-{{ loop.index }}" aria-label="Copy SHA256">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="9" y="9" width="12" height="12" rx="2"></rect>
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+              </svg>
+            </button>
+          </div>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
 <div class="panel panel--flush">
   <ul class="file-list">
     {% for link in links %}
@@ -24,4 +69,5 @@
     {% endfor %}
   </ul>
 </div>
+{% endif %}
 {% endblock %}

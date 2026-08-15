@@ -16,6 +16,29 @@ from .legacy import parse
 from .utilities import pypi_report_form, requests_session
 
 
+PACKAGE_TYPE_LABELS = {
+    "bdist_wheel": "Wheel",
+    "sdist": "Source",
+    "bdist_egg": "Egg",
+    "bdist_msi": "MSI",
+    "bdist_rpm": "RPM",
+    "bdist_dmg": "DMG",
+    "bdist_wininst": "Windows Installer",
+}
+
+
+def _human_size(num_bytes):
+    """Render a byte count as a short human-readable string, e.g. '12.3 KB'."""
+    if num_bytes is None:
+        return ""
+    size = float(num_bytes)
+    for unit in ("B", "KB", "MB", "GB"):
+        if size < 1024 or unit == "GB":
+            return f"{size:.0f} {unit}" if unit == "B" else f"{size:.1f} {unit}"
+        size /= 1024
+    return f"{size:.1f} GB"
+
+
 def _is_likely_text(decoded_str):
     """Check if decoded string looks like valid text (not corrupted)."""
     if not decoded_str:
@@ -164,6 +187,7 @@ if SENTRY_DSN := os.environ.get("SENTRY_DSN"):
 app = Flask(__name__)
 
 app.jinja_env.filters["unquote"] = lambda u: urllib.parse.unquote(u)
+app.jinja_env.filters["filesizeformat"] = _human_size
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
 
@@ -256,13 +280,26 @@ def distributions(project_name, version):
         return redirect(f"/project/{project_name}/")
 
     version_data = resp.json()
-    dist_urls = [
-        "." + urllib.parse.urlparse(url["url"]).path + "/"
+    files = [
+        {
+            "path": "." + urllib.parse.urlparse(url["url"]).path + "/",
+            "filename": url.get("filename"),
+            "size": url.get("size"),
+            "upload_time": url.get("upload_time"),
+            "python_version": url.get("python_version"),
+            "packagetype": PACKAGE_TYPE_LABELS.get(
+                url.get("packagetype"), url.get("packagetype")
+            ),
+            "requires_python": url.get("requires_python"),
+            "sha256": (url.get("digests") or {}).get("sha256"),
+            "yanked": url.get("yanked"),
+            "yanked_reason": url.get("yanked_reason"),
+        }
         for url in version_data["urls"]
     ]
     return render_template(
         "links.html",
-        links=dist_urls,
+        files=files,
         vulnerabilities=version_data.get("vulnerabilities") or [],
         h2=f"{project_name}",
         h2_link=f"/project/{project_name}",

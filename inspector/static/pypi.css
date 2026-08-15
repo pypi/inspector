@@ -680,6 +680,48 @@ table.data-table {
   color: var(--grey-mid);
 }
 
+/* SHA256 cell (file table) */
+
+.hash-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.hash-cell code {
+  font-size: 0.8rem;
+  color: var(--grey-mid);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 160px;
+}
+
+.hash-cell__copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  flex-shrink: 0;
+  color: var(--grey-mid);
+  background: none;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.hash-cell__copy:hover {
+  background: var(--ground);
+  color: var(--primary);
+}
+
+.hash-cell__copy.is-copied {
+  color: var(--success);
+}
+
 /* Pills / chips */
 
 .pill {
