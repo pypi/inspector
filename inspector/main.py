@@ -103,6 +103,43 @@ def _get_project_status(project_name):
         return None
 
 
+def _release_yank_status(version_data):
+    """Determine whether a specific release (not a single file within it) is
+    yanked, and its yanked_reason. The JSON API's per-release ``info.yanked``
+    / ``info.yanked_reason`` fields are the source of truth for this; fall
+    back to checking whether every file in the release was yanked only if
+    those fields are absent, so a single yanked file is never mistaken for
+    the whole release being yanked."""
+    info = version_data.get("info") or {}
+    if "yanked" in info:
+        return bool(info.get("yanked")), info.get("yanked_reason")
+    urls = version_data.get("urls") or []
+    if urls and all(u.get("yanked") for u in urls):
+        reason = next(
+            (u.get("yanked_reason") for u in urls if u.get("yanked_reason")), None
+        )
+        return True, reason
+    return False, None
+
+
+def _lifecycle_banner(
+    project_status, yanked=False, yanked_reason=None, prerelease=False
+):
+    """Combine a project's PEP 792 status with release-level yanked/prerelease
+    facts into the single (banner_status, banner_reason) pair the templates
+    render, applying quarantine > yanked > archived > prerelease > normal
+    precedence."""
+    if project_status == "quarantined":
+        return "quarantined", None
+    if yanked:
+        return "yanked", yanked_reason
+    if project_status == "archived":
+        return "archived", None
+    if prerelease:
+        return "prerelease", None
+    return "", None
+
+
 def _is_likely_text(decoded_str):
     """Check if decoded string looks like valid text (not corrupted)."""
     if not decoded_str:
@@ -334,12 +371,27 @@ def versions(project_name):
             "prerelease": parse(version).is_prerelease,
         }
 
+    # The project header shows the latest release, so its own yanked/
+    # prerelease state (not just the project-level PEP 792 status) belongs
+    # in the banner precedence too.
+    latest_version = info.get("version")
+    latest_yanked, latest_yanked_reason = _release_yank_status(data)
+    banner_status, banner_reason = _lifecycle_banner(
+        project_status,
+        yanked=latest_yanked,
+        yanked_reason=latest_yanked_reason,
+        prerelease=bool(latest_version) and parse(latest_version).is_prerelease,
+    )
+
     return render_template(
         "releases.html",
         releases=sorted_releases,
         release_status=release_status,
         project_status=project_status,
-        latest_version=info.get("version"),
+        banner_status=banner_status,
+        banner_reason=banner_reason,
+        pypi_project_url=pypi_project_url,
+        latest_version=latest_version,
         summary=info.get("summary"),
         author=info.get("author") or info.get("maintainer"),
         license=info.get("license"),
@@ -372,9 +424,14 @@ def distributions(project_name, version):
             301,
         )
 
+    # Fetch the release JSON and the Simple API's PEP 792 project status
+    # concurrently -- same reasoning as versions() above.
+    status_future = _STATUS_EXECUTOR.submit(_get_project_status, project_name)
     resp = requests_session().get(
         f"https://pypi.org/pypi/{project_name}/{version}/json"
     )
+    project_status = status_future.result()
+
     if resp.status_code != 200:
         return redirect(f"/project/{project_name}/")
 
@@ -396,10 +453,22 @@ def distributions(project_name, version):
         }
         for url in version_data["urls"]
     ]
+
+    yanked, yanked_reason = _release_yank_status(version_data)
+    banner_status, banner_reason = _lifecycle_banner(
+        project_status,
+        yanked=yanked,
+        yanked_reason=yanked_reason,
+        prerelease=parse(version).is_prerelease,
+    )
+
     return render_template(
         "links.html",
         files=files,
         vulnerabilities=version_data.get("vulnerabilities") or [],
+        banner_status=banner_status,
+        banner_reason=banner_reason,
+        pypi_project_url=f"https://pypi.org/project/{project_name}",
         h2=f"{project_name}",
         h2_link=f"/project/{project_name}",
         h2_paren="View this project on PyPI",
@@ -434,6 +503,11 @@ def distribution(project_name, version, first, second, rest, distname):
     except InspectorError:
         return abort(400)
 
+    # Kick off the Simple API's PEP 792 status lookup alongside the two
+    # existing sequential legacy JSON requests below -- it's independent of
+    # them, so there's no reason to add its latency on top.
+    status_future = _STATUS_EXECUTOR.submit(_get_project_status, project_name)
+
     h2_paren = "View this project on PyPI"
     resp = requests_session().get(f"https://pypi.org/pypi/{project_name}/json")
     if resp.status_code == 404:
@@ -443,8 +517,21 @@ def distribution(project_name, version, first, second, rest, distname):
     resp = requests_session().get(
         f"https://pypi.org/pypi/{project_name}/{version}/json"
     )
+    version_data = resp.json() if resp.status_code == 200 else None
     if resp.status_code == 404:
         h3_paren = "Release no longer on PyPI"
+
+    project_status = status_future.result()
+
+    yanked, yanked_reason = (
+        _release_yank_status(version_data) if version_data else (False, None)
+    )
+    banner_status, banner_reason = _lifecycle_banner(
+        project_status,
+        yanked=yanked,
+        yanked_reason=yanked_reason,
+        prerelease=parse(version).is_prerelease,
+    )
 
     if dist:
         file_urls = [
@@ -453,6 +540,9 @@ def distribution(project_name, version, first, second, rest, distname):
         return render_template(
             "links.html",
             links=file_urls,
+            banner_status=banner_status,
+            banner_reason=banner_reason,
+            pypi_project_url=f"https://pypi.org/project/{project_name}",
             h2=f"{project_name}",
             h2_link=f"/project/{project_name}",
             h2_paren=h2_paren,
@@ -487,6 +577,11 @@ def file(project_name, version, first, second, rest, distname, filepath):
             301,
         )
 
+    # Kick off the Simple API's PEP 792 status lookup alongside the two
+    # existing sequential legacy JSON requests below -- it's independent of
+    # them, so there's no reason to add its latency on top.
+    status_future = _STATUS_EXECUTOR.submit(_get_project_status, project_name)
+
     h2_paren = "View this project on PyPI"
     resp = requests_session().get(f"https://pypi.org/pypi/{project_name}/json")
     if resp.status_code == 404:
@@ -496,8 +591,21 @@ def file(project_name, version, first, second, rest, distname, filepath):
     resp = requests_session().get(
         f"https://pypi.org/pypi/{project_name}/{version}/json"
     )
+    version_data = resp.json() if resp.status_code == 200 else None
     if resp.status_code == 404:
         h3_paren = "Release no longer on PyPI"
+
+    project_status = status_future.result()
+
+    yanked, yanked_reason = (
+        _release_yank_status(version_data) if version_data else (False, None)
+    )
+    banner_status, banner_reason = _lifecycle_banner(
+        project_status,
+        yanked=yanked,
+        yanked_reason=yanked_reason,
+        prerelease=parse(version).is_prerelease,
+    )
 
     dist = _get_dist(first, second, rest, distname)
     if dist:
@@ -514,6 +622,9 @@ def file(project_name, version, first, second, rest, distname, filepath):
         common_params = {
             "file_details": details,
             "mailto_report_link": report_link,
+            "banner_status": banner_status,
+            "banner_reason": banner_reason,
+            "pypi_project_url": f"https://pypi.org/project/{project_name}",
             "h2": f"{project_name}",
             "h2_link": f"/project/{project_name}",
             "h2_paren": h2_paren,

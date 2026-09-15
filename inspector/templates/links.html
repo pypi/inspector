@@ -20,11 +20,12 @@
 {% endmacro %}
 
 {% block above_body %}
-<div class="project-banner">
+<div class="project-banner{% if banner_status %} project-banner--{{ banner_status }}{% endif %}">
   <div class="project-banner__container">
+    {% include "_project_status.html" %}
     <h1>Package files</h1>
     <p>{{ h3 or h2 }}</p>
-    {% if files %}
+    {% if files and banner_status != 'quarantined' %}
       {% with installer_spec = "==" ~ request.view_args.version %}
         {% include "_installer.html" %}
       {% endwith %}

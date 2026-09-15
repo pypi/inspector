@@ -9,7 +9,15 @@
 </style>
 {% endblock %}
 
-{% block above_body %}{% endblock %}
+{% block above_body %}
+{% if banner_status %}
+<div class="project-banner project-banner--{{ banner_status }}">
+  <div class="project-banner__container">
+    {% include "_project_status.html" %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}
 
 {% block body %}
 <div class="callout callout--warning">

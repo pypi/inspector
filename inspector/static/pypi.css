@@ -412,48 +412,7 @@ button, input {
   border-radius: var(--radius-control);
 }
 
-/* Project status banner (archived / quarantined) */
-
-.status-banner {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  border-radius: var(--radius-card);
-  padding: 14px 20px;
-  margin-bottom: 20px;
-}
-
-.status-banner strong {
-  display: block;
-  font-size: 0.95rem;
-}
-
-.status-banner p {
-  margin: 2px 0 0;
-  font-size: 0.9rem;
-}
-
-.status-banner svg {
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.status-banner--archived {
-  background: var(--border-soft);
-  color: var(--text);
-}
-
-.status-banner--quarantined {
-  background: var(--warning);
-  color: #fff;
-}
-
-.status-banner--quarantined a {
-  color: #fff;
-  text-decoration: underline;
-}
-
-/* Project banner (project/version pages) */
+/* Project banner (project/version/archive/code pages) */
 
 .project-banner {
   background: var(--primary);
@@ -461,10 +420,57 @@ button, input {
   margin: 0;
 }
 
+.project-banner--quarantined {
+  background: var(--warning);
+  color: #fff;
+}
+
+.project-banner--yanked {
+  background: var(--text);
+  color: #fff;
+}
+
+.project-banner--archived {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.project-banner--prerelease {
+  background: var(--primary-light-border);
+  color: var(--text);
+}
+
+.project-banner--archived :focus-visible,
+.project-banner--prerelease :focus-visible {
+  outline-color: var(--text);
+}
+
 .project-banner__container {
   max-width: 1150px;
   margin: 0 auto;
   padding: 32px 30px;
+}
+
+.project-banner__status {
+  margin: 0 0 14px;
+}
+
+.project-banner__status-label {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.project-banner__status-reason {
+  margin: 4px 0 0;
+  max-width: 68ch;
+  font-size: 0.9rem;
+}
+
+.project-banner__status .btn {
+  margin-top: 12px;
 }
 
 .project-banner h1 {
