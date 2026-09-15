@@ -5,7 +5,7 @@
 {% block above_body %}
 <div class="page-hero">
   <div class="page-hero__container">
-    <h1>Inspect Python packages<br>hosted on the Python Package Index</h1>
+    <h1>Inspect Python packages hosted on the Python Package Index</h1>
     <form action="/" method="get" role="search" aria-label="Inspect a project">
       <div class="search-field">
         <label class="visually-hidden" for="home-project-input">Search projects</label>
@@ -23,20 +23,20 @@
 {% endblock %}
 
 {% block body %}
-<div class="feature-grid">
-  <div class="feature">
-    <h2>Search packages</h2>
-    <p class="text-muted">Find any project on PyPI by name</p>
-  </div>
-
-  <div class="feature">
-    <h2>Browse releases</h2>
-    <p class="text-muted">See every version and its artifacts</p>
-  </div>
-
-  <div class="feature">
-    <h2>Inspect code</h2>
-    <p class="text-muted">Read source and disassembled bytecode</p>
-  </div>
+<div class="home-intro">
+  <section aria-labelledby="about-inspector">
+    <h2 id="about-inspector">Look inside a Python package</h2>
+    <p>Inspector lets security researchers browse files published to PyPI and
+      share specific code in security reports. Choose a project, open a release,
+      and inspect its source without installing the package.</p>
+  </section>
+  <section aria-labelledby="example-projects">
+    <h2 id="example-projects">Try a project</h2>
+    <ul class="home-intro__projects">
+      <li><a href="/project/requests/">requests</a></li>
+      <li><a href="/project/pip/">pip</a></li>
+      <li><a href="/project/packaging/">packaging</a></li>
+    </ul>
+  </section>
 </div>
 {% endblock %}

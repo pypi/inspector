@@ -49,3 +49,7 @@ document.querySelectorAll("[data-installer-command]").forEach((control) => {
   render();
   select.disabled = false;
 });
+
+document.querySelectorAll("[data-current-year]").forEach((element) => {
+  element.textContent = new Date().getFullYear();
+});
