@@ -30,6 +30,33 @@
   --radius-control: 3px;
 }
 
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --primary: #81c8f3;
+  --primary-dark: #b5e0ff;
+  --primary-tint: #152f43;
+  --primary-light-border: #2e587a;
+  --band-blue: #075581;
+  --success: #90d9a2;
+  --success-tint: #16301f;
+  --success-tint-border: #2f5b3c;
+  --warning: #f0ca79;
+  --warning-tint: #372f1e;
+  --warning-tint-border: #6b5a2f;
+  --danger: #ffada8;
+  --danger-tint: #3a2328;
+  --danger-tint-border: #6a3a3d;
+  --ground: #0f1720;
+  --surface: #17222f;
+  --card: #111c28;
+  --row-hover: #17293b;
+  --border: #394b5e;
+  --border-soft: #394b5e;
+  --control-border: #71869b;
+  --grey-mid: #b0bfce;
+  --text: #e5edf5;
+}
+
 *,
 *::before,
 *::after {
@@ -249,6 +276,23 @@ button, input {
 .site-menu a:hover {
   color: #fff;
   text-decoration: underline;
+  background: #0068a6;
+}
+
+.theme-toggle {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
   background: #0068a6;
 }
 
@@ -1599,6 +1643,100 @@ a.is-yanked:hover {
   .site-footer {
     padding: 35px 0 20px;
   }
+}
+
+/* Dark mode: fixed brand hues for solid-fill chrome, plus fixes for the
+   handful of hardcoded light-only colors above. Tinted surfaces (callouts,
+   pills, panels) already re-theme through the custom properties. */
+
+:root[data-theme="dark"] .site-header {
+  border-bottom-color: #376483;
+}
+
+:root[data-theme="dark"] .site-header__search input {
+  background: var(--surface);
+  border-color: var(--control-border);
+}
+
+:root[data-theme="dark"] .site-menu a:hover,
+:root[data-theme="dark"] .theme-toggle:hover {
+  background: #06466d;
+}
+
+:root[data-theme="dark"] .page-hero {
+  background: #075581;
+}
+
+:root[data-theme="dark"] .page-hero .search-field input {
+  background: var(--surface);
+}
+
+:root[data-theme="dark"] .project-banner {
+  background: #075581;
+}
+
+:root[data-theme="dark"] .project-banner--quarantined {
+  background: #6b4210;
+}
+
+:root[data-theme="dark"] .project-banner--yanked {
+  background: #1b2938;
+}
+
+:root[data-theme="dark"] .pip-install select option {
+  background: var(--card);
+}
+
+:root[data-theme="dark"] .skip-link {
+  background: var(--card);
+}
+
+:root[data-theme="dark"] .copy-btn::after {
+  background: #2b3d50;
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .tab.is-disabled,
+:root[data-theme="dark"] .tab.is-disabled:hover {
+  color: #5b6b7a;
+}
+
+:root[data-theme="dark"] .btn--primary {
+  background: #006dad;
+}
+
+:root[data-theme="dark"] .btn--primary:hover {
+  background: #005487;
+}
+
+:root[data-theme="dark"] .btn--danger {
+  background: var(--danger-tint);
+  border-color: var(--danger-tint-border);
+}
+
+:root[data-theme="dark"] .btn--danger:hover {
+  background: #4a2c31;
+}
+
+:root[data-theme="dark"] .segmented button.is-active {
+  background: #006dad;
+}
+
+:root[data-theme="dark"] .pill--yanked {
+  background: #1b2938;
+  border-color: #1b2938;
+}
+
+:root[data-theme="dark"] .site-footer {
+  background: #084f79;
+}
+
+:root[data-theme="dark"] .site-footer a.site-footer__button {
+  border-color: #a7c9de;
+}
+
+:root[data-theme="dark"] .site-footer a.site-footer__button:hover {
+  background: #064164;
 }
 
 /* Utility */
