@@ -17,15 +17,7 @@
     {% if summary %}
       <p>{{ summary }}</p>
     {% endif %}
-    <div class="pip-install">
-      <code id="pip-install-cmd">pip install {{ h2 }}</code>
-      <button type="button" class="pip-install__copy copy-btn" data-copy-target="pip-install-cmd" aria-label="Copy command">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <rect x="9" y="9" width="12" height="12" rx="2"></rect>
-          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
-        </svg>
-      </button>
-    </div>
+    {% include "_installer.html" %}
   </div>
 </div>
 {% endblock %}
@@ -86,8 +78,9 @@
                 <div class="version-cell">
                   <a href="./{{ key }}" {% if status.yanked %}class="is-yanked"{% endif %}>{{ key }}</a>
                   <button type="button" class="version-cell__copy copy-btn"
-                          data-copy-text="pip install {{ h2 }}=={{ key }}"
-                          aria-label="Copy pip install command for {{ key }}">
+                          data-copy-project="{{ h2 }}" data-copy-spec="=={{ key }}"
+                          data-copy-text="pip install {% if '!' in key %}'{{ h2 }}=={{ key }}'{% else %}{{ h2 }}=={{ key }}{% endif %}"
+                          aria-label="Copy install command for {{ key }}">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                       <rect x="9" y="9" width="12" height="12" rx="2"></rect>
                       <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>

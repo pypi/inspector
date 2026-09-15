@@ -480,19 +480,65 @@ button, input {
 
 .project-banner .pip-install {
   display: inline-flex;
-  align-items: center;
-  gap: 10px;
+  align-items: stretch;
+  gap: 0;
   max-width: 100%;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px dotted color-mix(in srgb, currentColor 55%, transparent);
   border-radius: var(--radius-control);
-  padding: 8px 10px 8px 16px;
+  padding: 0;
   font-size: 0.9rem;
 }
 
 .pip-install code {
+  min-width: 0;
+  padding: 10px 8px;
   overflow-wrap: anywhere;
   color: inherit;
+}
+
+.pip-install__installer {
+  position: relative;
+  flex-shrink: 0;
+  border-right: 1px dotted color-mix(in srgb, currentColor 55%, transparent);
+}
+
+.pip-install__installer::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  border: 4px solid transparent;
+  border-top-color: currentColor;
+  transform: translateY(-25%);
+  pointer-events: none;
+}
+
+.pip-install select {
+  appearance: none;
+  field-sizing: content;
+  min-height: 44px;
+  height: 100%;
+  padding: 8px 24px 8px 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.pip-install select option {
+  background: #fff;
+  color: var(--text);
+}
+
+.pip-install select:hover {
+  background: color-mix(in srgb, currentColor 15%, transparent);
+}
+
+.pip-install select:focus-visible {
+  outline-offset: -3px;
 }
 
 /* Shared "Copied!" tooltip for any [data-copy-target] button. */
@@ -528,23 +574,26 @@ button, input {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  flex-shrink: 0;
+  width: 44px;
+  min-height: 44px;
   padding: 0;
-  color: rgba(255, 255, 255, 0.85);
+  color: inherit;
+  opacity: 0.85;
   background: none;
   border: 0;
+  border-left: 1px dotted color-mix(in srgb, currentColor 55%, transparent);
   border-radius: var(--radius-control);
   cursor: pointer;
 }
 
 .pip-install__copy:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
+  background: color-mix(in srgb, currentColor 15%, transparent);
+  opacity: 1;
 }
 
 .pip-install__copy.is-copied {
-  color: var(--highlight);
+  opacity: 1;
 }
 
 /* 404 page */

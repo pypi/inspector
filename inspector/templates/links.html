@@ -24,6 +24,11 @@
   <div class="project-banner__container">
     <h1>Package files</h1>
     <p>{{ h3 or h2 }}</p>
+    {% if files %}
+      {% with installer_spec = "==" ~ request.view_args.version %}
+        {% include "_installer.html" %}
+      {% endwith %}
+    {% endif %}
   </div>
 </div>
 {% endblock %}
