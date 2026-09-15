@@ -10,6 +10,26 @@
 </li>
 {% endmacro %}
 
+{% block above_body %}
+<div class="project-banner">
+  <div class="project-banner__container">
+    <h1>{{ h2 }}{% if latest_version %} <span class="version">{{ latest_version }}</span>{% endif %}</h1>
+    {% if summary %}
+      <p>{{ summary }}</p>
+    {% endif %}
+    <div class="pip-install">
+      <code id="pip-install-cmd">pip install {{ h2 }}</code>
+      <button type="button" class="pip-install__copy copy-btn" data-copy-target="pip-install-cmd" aria-label="Copy command">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <rect x="9" y="9" width="12" height="12" rx="2"></rect>
+          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
 {% block body %}
 {% if project_status == "archived" %}
 <div class="status-banner status-banner--archived">
@@ -22,21 +42,6 @@
   </div>
 </div>
 {% endif %}
-<div class="project-banner">
-  <h1>{{ h2 }}{% if latest_version %} <span class="version">{{ latest_version }}</span>{% endif %}</h1>
-  {% if summary %}
-    <p>{{ summary }}</p>
-  {% endif %}
-  <div class="pip-install">
-    <code id="pip-install-cmd">pip install {{ h2 }}</code>
-    <button type="button" class="pip-install__copy copy-btn" data-copy-target="pip-install-cmd" aria-label="Copy command">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <rect x="9" y="9" width="12" height="12" rx="2"></rect>
-        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
-      </svg>
-    </button>
-  </div>
-</div>
 
 {% with vuln_scope = "in " ~ latest_version %}
   {% include "_vulnerabilities.html" %}

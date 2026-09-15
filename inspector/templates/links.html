@@ -19,11 +19,16 @@
 {% endif %}
 {% endmacro %}
 
-{% block body %}
+{% block above_body %}
 <div class="project-banner">
-  <h1>Package files</h1>
-  <p>{{ h3 or h2 }}</p>
+  <div class="project-banner__container">
+    <h1>Package files</h1>
+    <p>{{ h3 or h2 }}</p>
+  </div>
 </div>
+{% endblock %}
+
+{% block body %}
 
 {% with vuln_scope = "in this release" %}
   {% include "_vulnerabilities.html" %}
