@@ -3,7 +3,12 @@
 {% block body %}
 <ul>
 {% for link in links %}
-  <li><a href="{{ link }}">{{ link|unquote }}</a></li>
+  <li>
+    <a href="{{ link }}">{{ link|unquote }}</a>
+    {% if sizes is defined and sizes[loop.index0] is defined %}
+      <span>({{ sizes[loop.index0]|humanbytes }})</span>
+    {% endif %}
+  </li>
 {% endfor %}
 </ul>
 {% endblock %}
