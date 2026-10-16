@@ -10,7 +10,15 @@ services:
     env_file: dev/environment
     volumes:
       - .:/app/
+      # Neat hack to prevent actually mounting the venv into the container.
+      - type: volume
+        source: venv
+        target: /app/.venv
     ports:
       - "80:8080"
     #links:
     #  - db
+
+volumes:
+  venv:
+
