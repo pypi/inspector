@@ -4,11 +4,7 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --output-file=requirements/deploy.txt ./requirements/deploy.in
 #
-gunicorn==26.0.0 \
-    --hash=sha256:40233d26a5f0d1872916188c276e21641155111c2853f0c2cd55260aec0d24fc \
-    --hash=sha256:ca9346f85e3a4aeeb64d491045c16b9a35647abd37ea15efe53080eb8b090baf
+gunicorn==26.2.0 \
+    --hash=sha256:62b864895d9ebff0b2f9867ba04fe811c93121596540830c9c916d0769668447 \
+    --hash=sha256:bd249d0b3f7972f7432f0a6b6ff3b3ee2d129f70cd1ff6c09a9dd9e29a2b88e3
     # via -r requirements/deploy.in
-packaging==26.2 \
-    --hash=sha256:5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e \
-    --hash=sha256:ff452ff5a3e828ce110190feff1178bb1f2ea2281fa2075aadb987c2fb221661
-    # via gunicorn
