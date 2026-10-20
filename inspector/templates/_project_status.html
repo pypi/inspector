@@ -1,0 +1,31 @@
+{#
+  Lifecycle status content for a `.project-banner`. Consumes backend-supplied
+  `banner_status` ('' | 'quarantined' | 'yanked' | 'archived' | 'prerelease')
+  and `banner_reason` (string or None), matching PyPI Warehouse's own
+  project-status language. Include inside a `.project-banner__container`
+  whose outer `.project-banner` already carries the `project-banner--<status>`
+  modifier class. Renders nothing for the normal ('') state.
+#}
+{% set banner_status = banner_status|default('') %}
+{% set banner_reason = banner_reason|default(None) %}
+{% if banner_status %}
+{% set banner_labels = {
+  'quarantined': 'Quarantined',
+  'yanked': 'Yanked',
+  'archived': 'Archived',
+  'prerelease': 'Pre-release',
+} %}
+{% set banner_defaults = {
+  'quarantined': 'This project has been quarantined by PyPI admins pending a security review.',
+  'yanked': 'This release has been yanked by its maintainers and should not be used for new installs.',
+  'archived': 'This project has been archived by its maintainers and is no longer receiving updates.',
+  'prerelease': 'This is a pre-release version and may be unstable.',
+} %}
+<div class="project-banner__status">
+  <strong class="project-banner__status-label">{{ banner_labels.get(banner_status, banner_status|capitalize) }}</strong>
+  <p class="project-banner__status-reason">{{ banner_reason or banner_defaults.get(banner_status, '') }}</p>
+  {% if banner_status == 'quarantined' %}
+    <a href="{{ pypi_project_url }}" class="btn btn--primary" rel="noopener" target="_blank">View on PyPI</a>
+  {% endif %}
+</div>
+{% endif %}

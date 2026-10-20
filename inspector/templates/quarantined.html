@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% set banner_status = 'quarantined' %}
+
+{% block above_body %}
+<div class="project-banner project-banner--quarantined">
+  <div class="project-banner__container">
+    {% include "_project_status.html" %}
+    <h1>{{ h2 }}</h1>
+  </div>
+</div>
+{% endblock %}
+
+{% block body %}
+<div class="not-found">
+  <p class="text-muted">
+    While in quarantine, this project cannot be installed or modified, and
+    its files aren't available for inspection here. PyPI's own project page
+    has more detail.
+  </p>
+</div>
+{% endblock %}
