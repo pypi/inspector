@@ -21,6 +21,7 @@ def decompile(code: bytes) -> str:
 
     with tempfile.NamedTemporaryFile() as file:
         file.write(code)
+        file.flush()
         output = subprocess.Popen(
             ["pycdc", file.name], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
@@ -33,6 +34,7 @@ def decompile(code: bytes) -> str:
 def disassemble(code: bytes) -> str:
     with tempfile.NamedTemporaryFile() as file:
         file.write(code)
+        file.flush()
         output = subprocess.Popen(
             ["pycdas", file.name], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
