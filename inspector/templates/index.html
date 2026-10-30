@@ -1,1 +1,42 @@
 {% extends 'base.html' %}
+
+{% block header_search %}{% endblock %}
+
+{% block above_body %}
+<div class="page-hero">
+  <div class="page-hero__container">
+    <h1>Inspect Python packages hosted on the Python Package Index</h1>
+    <form action="/" method="get" role="search" aria-label="Inspect a project">
+      <div class="search-field">
+        <label class="visually-hidden" for="home-project-input">Search projects</label>
+        <input id="home-project-input" type="text" name="project" placeholder="Type '/' to search projects"
+               autocomplete="off" autocapitalize="off" spellcheck="false" aria-keyshortcuts="/">
+        <button type="submit" aria-label="Search projects">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block body %}
+<div class="home-intro">
+  <section aria-labelledby="about-inspector">
+    <h2 id="about-inspector">Look inside a Python package</h2>
+    <p>Inspector lets security researchers browse files published to PyPI and
+      share specific code in security reports. Choose a project, open a release,
+      and inspect its source without installing the package.</p>
+  </section>
+  <section aria-labelledby="example-projects">
+    <h2 id="example-projects">Try a project</h2>
+    <ul class="home-intro__projects">
+      <li><a href="/project/requests/">requests</a></li>
+      <li><a href="/project/pip/">pip</a></li>
+      <li><a href="/project/packaging/">packaging</a></li>
+    </ul>
+  </section>
+</div>
+{% endblock %}
