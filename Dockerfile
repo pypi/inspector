@@ -26,14 +26,13 @@ RUN set -x \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Install pycdc and pycdas...
+# Install pycdc...
 WORKDIR /tmp
 RUN git clone "https://github.com/zrax/pycdc.git" && \
     cd pycdc && \
     cmake . && \
     cmake --build . --config release && \
     mv ./pycdc /usr/local/bin && \
-    mv ./pycdas /usr/local/bin && \
     cd .. && rm -rf ./pycdc
 
 # Copy local code to the container image.

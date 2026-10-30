@@ -5,3 +5,4 @@ gunicorn
 requests
 packaging
 sentry-sdk[flask]
+xdis

@@ -5,7 +5,7 @@ This module contains functions for decompiling and disassembling files.
 import subprocess
 import tempfile
 
-DISASM_HEADER = "This file was disassembled from bytecode by Inspector using pycdas."
+DISASM_HEADER = "This file was disassembled from bytecode by Inspector using xdis."
 DECOMPILE_HEADER = (
     '"""\n'
     "This file was decompiled from bytecode by Inspector using pycdc.\n"
@@ -32,11 +32,11 @@ def decompile(code: bytes) -> str:
 
 
 def disassemble(code: bytes) -> str:
-    with tempfile.NamedTemporaryFile() as file:
+    with tempfile.NamedTemporaryFile(suffix=".pyc") as file:
         file.write(code)
         file.flush()
         output = subprocess.Popen(
-            ["pycdas", file.name], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+            ["pydisasm", file.name], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
 
         disassembly = b"".join([line for line in output.stdout.readlines()]).decode()
