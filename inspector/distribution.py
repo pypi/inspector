@@ -35,6 +35,9 @@ class ZipDistribution(Distribution):
     def namelist(self):
         return [i.filename for i in self.zipfile.infolist() if not i.is_dir()]
 
+    def sizelist(self):
+        return [i.file_size for i in self.zipfile.infolist() if not i.is_dir()]
+
     def contents(self, filepath) -> bytes:
         try:
             return self.zipfile.read(filepath)
@@ -52,6 +55,9 @@ class TarGzDistribution(Distribution):
 
     def namelist(self):
         return [i.name for i in self.tarfile.getmembers() if not i.isdir()]
+
+    def sizelist(self):
+        return [i.size for i in self.tarfile.getmembers() if not i.isdir()]
 
     def contents(self, filepath):
         try:
