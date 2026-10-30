@@ -1,6 +1,6 @@
 # Use the official lightweight Python image.
 # https://hub.docker.com/_/python
-FROM python:3.11.15-slim-bookworm
+FROM python:3.15.2-slim-trixie
 
 # Allow statements and log messages to immediately appear in the logs
 ENV PYTHONUNBUFFERED True
@@ -26,14 +26,15 @@ RUN set -x \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Install pycdc and pycdas...
+# Install pycdc...
 WORKDIR /tmp
-RUN git clone "https://github.com/zrax/pycdc.git" && \
+RUN git init pycdc && \
     cd pycdc && \
+    git fetch --depth 1 "https://github.com/zrax/pycdc.git" b4289760970dbc399684f1e155ec6d1ea1cc787e && \
+    git checkout FETCH_HEAD && \
     cmake . && \
     cmake --build . --config release && \
     mv ./pycdc /usr/local/bin && \
-    mv ./pycdas /usr/local/bin && \
     cd .. && rm -rf ./pycdc
 
 # Copy local code to the container image.
