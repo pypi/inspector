@@ -28,8 +28,10 @@ RUN set -x \
 
 # Install pycdc...
 WORKDIR /tmp
-RUN git clone "https://github.com/zrax/pycdc.git" && \
+RUN git init pycdc && \
     cd pycdc && \
+    git fetch --depth 1 "https://github.com/zrax/pycdc.git" b4289760970dbc399684f1e155ec6d1ea1cc787e && \
+    git checkout FETCH_HEAD && \
     cmake . && \
     cmake --build . --config release && \
     mv ./pycdc /usr/local/bin && \
