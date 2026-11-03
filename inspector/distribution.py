@@ -16,12 +16,52 @@ from .utilities import requests_session
 dists = {}
 
 
+def _normalize_name(name):
+    """
+    Reduce an archive member name to a canonical, root-relative path.
+
+    Some old distributions were built with member names that carry a
+    leading "/./" or "./", or "." segments in the middle of the path.
+    Those names can never be addressed over HTTP: URL handling removes
+    dot segments, so a request for the file arrives under its normalized
+    path and an exact-name lookup against the raw member name misses.
+
+    "." and empty segments are dropped, and ".." segments are resolved
+    against the segments seen so far, clamped at the archive root so the
+    result can never point outside the distribution.
+    """
+    parts = []
+    for part in name.split("/"):
+        if part in ("", "."):
+            continue
+        elif part == "..":
+            if parts:
+                parts.pop()
+        else:
+            parts.append(part)
+    return "/".join(parts)
+
+
 class Distribution:
     def namelist(self):
         raise NotImplementedError
 
     def read(self):
         raise NotImplementedError
+
+    def _member_map(self, names):
+        """
+        Map normalized member names to their original archive names.
+
+        If two members normalize to the same name, the first one in
+        archive order wins.
+        """
+        mapping = {}
+        for name in names:
+            normalized = _normalize_name(name)
+            if normalized and normalized not in mapping:
+                mapping[normalized] = name
+        return mapping
 
 
 class ZipDistribution(Distribution):
@@ -31,13 +71,20 @@ class ZipDistribution(Distribution):
             self.zipfile = zipfile.ZipFile(f)
         except zipfile.BadZipFile:
             raise BadFileError("Bad zipfile")
+        self._members = self._member_map(
+            i.filename for i in self.zipfile.infolist() if not i.is_dir()
+        )
 
     def namelist(self):
-        return [i.filename for i in self.zipfile.infolist() if not i.is_dir()]
+        return list(self._members)
 
     def contents(self, filepath) -> bytes:
         try:
-            return self.zipfile.read(filepath)
+            original = self._members[_normalize_name(filepath)]
+        except KeyError:
+            raise FileNotFoundError
+        try:
+            return self.zipfile.read(original)
         except KeyError:
             raise FileNotFoundError
 
@@ -49,13 +96,20 @@ class TarGzDistribution(Distribution):
             self.tarfile = tarfile.open(fileobj=f, mode="r:gz")
         except gzip.BadGzipFile:
             raise BadFileError("Bad gzip file")
+        self._members = self._member_map(
+            i.name for i in self.tarfile.getmembers() if not i.isdir()
+        )
 
     def namelist(self):
-        return [i.name for i in self.tarfile.getmembers() if not i.isdir()]
+        return list(self._members)
 
     def contents(self, filepath):
         try:
-            file_ = self.tarfile.extractfile(filepath)
+            original = self._members[_normalize_name(filepath)]
+        except KeyError:
+            raise FileNotFoundError
+        try:
+            file_ = self.tarfile.extractfile(original)
             if file_:
                 return file_.read()
             else:
